@@ -1,100 +1,116 @@
 package com.example.scope;
 
+import java.io.File;
+import java.io.FileOutputStream;
+
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
-import android.widget.ImageView;
+import android.widget.Toast;
 
 public class Cropping extends Activity {
 	private static final String TAG = "Scope.java";
 	public Bitmap myimage;
+	protected static final String PHOTO_TAKEN = "photo_taken";
+	final int PIC_CROP = 2;
+	public Uri image_uri;
+	public String filepath;
+
+	// Context a;
+
+	// private Uri outputFileUri;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "enter...");
-		setContentView(R.layout.cropping);
-		Log.v(TAG, "creating...");
-		String filepath = getIntent().getStringExtra("file_path");
-		Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
-		ImageView imageView = (ImageView) findViewById(R.id.imgView);
-		imageView.setImageBitmap(yourSelectedImage);
-		crop_here(yourSelectedImage);
+		//setContentView(R.layout.cropping);
+		Log.v(TAG, "cropping...");
+		filepath = getIntent().getStringExtra("file_path");
+		String b = getIntent().getStringExtra("image_uri");
+		image_uri = Uri.parse(b);
+		Log.v(TAG, image_uri.toString());
+		// image_uri= Uri.parse(b);
+		// Uri image_uri = Uri.parse(intent.getStringExtra("image_uri"));
+		//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
+		//ImageView imageView = (ImageView) findViewById(R.id.imgView);
+		//imageView.setImageBitmap(yourSelectedImage);
+		// Log.v(TAG,b);
+
+		crop_here(image_uri);
 	}
 
-	public void crop_here(Bitmap image) {
-/*
-	 final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
- 
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setType("image/*");
- 
-        List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
- 
-        int size = list.size();
- 
-        if (size == 0) {
-            Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
- 
-            return;
-        } else {
-            intent.setData(mImageCaptureUri);
- 
-            intent.putExtra("outputX", 200);
-            intent.putExtra("outputY", 200);
-            intent.putExtra("aspectX", 1);
-            intent.putExtra("aspectY", 1);
-            intent.putExtra("scale", true);
-            intent.putExtra("return-data", true);
- 
-            if (size == 1) {
-                Intent i        = new Intent(intent);
-                ResolveInfo res = list.get(0);
- 
-                i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
- 
-                startActivityForResult(i, CROP_FROM_CAMERA);
-            } else {
-                for (ResolveInfo res : list) {
-                    final CropOption co = new CropOption();
- 
-                    co.title    = getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
-                    co.icon     = getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
-                    co.appIntent= new Intent(intent);
- 
-                    co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
- 
-                    cropOptions.add(co);
-                }
- 
-                CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
- 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Choose Crop App");
-                builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
-                    public void onClick( DialogInterface dialog, int item ) {
-                        startActivityForResult( cropOptions.get(item).appIntent, CROP_FROM_CAMERA);
-                    }
-                });
- 
-                builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel( DialogInterface dialog ) {
- 
-                        if (mImageCaptureUri != null ) {
-                            getContentResolver().delete(mImageCaptureUri, null, null );
-                            mImageCaptureUri = null;
-                        }
-                    }
-                } );
- 
-                AlertDialog alert = builder.create();
- 
-                alert.show();
-            }
-        }	
-*/
+	public void crop_here(Uri outputFileUri) {
+		try {
+			// call the standard crop action intent (the user device may not
+			// support it)
+			Intent cropIntent = new Intent("com.android.camera.action.CROP");
+			// indicate image type and Uri
+			cropIntent.setDataAndType(outputFileUri, "image/*");
+			// set crop properties
+			cropIntent.putExtra("crop", "true");
+			// indicate aspect of desired crop
+			cropIntent.putExtra("aspectX", 1);
+			cropIntent.putExtra("aspectY", 1);
+			// indicate output X and Y
+			cropIntent.putExtra("outputX", 256);
+			cropIntent.putExtra("outputY", 256);
+			cropIntent.putExtra("scale", true);
+			// retrieve data on return
+			cropIntent.putExtra("return-data", true);
+			// start the activity - we handle returning in onActivityResult
+			startActivityForResult(cropIntent, PIC_CROP);
+		} catch (ActivityNotFoundException anfe) {
+			// display an error message
+			String errorMessage = "Whoops - your device doesn't support the crop action!";
+			Toast toast = Toast.makeText(this.getApplicationContext(),
+					errorMessage, Toast.LENGTH_SHORT);
+			toast.show();
+		}
 	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.v(TAG, "INSisss");
+		// Uri image_uri=data.getData();
+		if (resultCode == -1) {
+			if (requestCode == PIC_CROP) {
+				Bundle extras = data.getExtras();
+				// Uri image_uri=data.getData();
+				Log.v(TAG, "all good");
+				Log.i(TAG, "resultCode: " + resultCode);
+				Log.i(TAG, "requestCode: " + requestCode);
+				Log.v(TAG, image_uri.toString());
+
+				Bitmap thePic = extras.getParcelable("data");
+
+				File file = new File(
+						Environment
+								.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+						"temp.bmp");
+
+				try {
+					FileOutputStream out = new FileOutputStream(file);
+					thePic.compress(Bitmap.CompressFormat.PNG, 90, out);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				Uri uri = Uri.fromFile(file);
+				Log.v(TAG, uri.toString());
+
+				Log.v(TAG, thePic.toString());
+				Intent i = new Intent(this, CropScreen.class);
+				i.putExtra("file_path", filepath);
+				i.putExtra("image_uri", uri.toString());
+				startActivity(i);
+			}
+
+		}
+	}
+
 }

@@ -70,6 +70,7 @@ public class UploadFragment extends Fragment {
 			Uri selectedImage = data.getData();
 			String[] filePathColumn = { MediaStore.Images.Media.DATA };
 			Log.v(TAG, "6.. Pass");
+			Log.v(TAG,selectedImage.toString());
 
 			// IMP : Getting global activity status to use getContentresolver()
 			// under a fragment
@@ -95,6 +96,7 @@ public class UploadFragment extends Fragment {
 			
 			Intent intent = new Intent(a, CropScreen.class);
 			intent.putExtra("file_path", filePath);
+			intent.putExtra("image_uri",selectedImage.toString() );
 			startActivity(intent);
 		    
 		}
