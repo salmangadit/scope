@@ -1,17 +1,13 @@
 package com.example.scope;
 
 import java.io.File;
-import com.googlecode.tesseract.android.*;
 import java.io.IOException;
-
-import com.example.scope.MainActivity;
 
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -23,8 +19,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.googlecode.tesseract.android.TessBaseAPI;
 
 public class ScanFragment extends Fragment {
 	protected Button _button;

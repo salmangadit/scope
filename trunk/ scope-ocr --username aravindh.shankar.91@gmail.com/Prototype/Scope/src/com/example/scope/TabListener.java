@@ -1,9 +1,9 @@
 package com.example.scope;
 
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.ActionBar.Tab;
-import android.app.ActionBar;
 import android.widget.Toast;
 
 public class TabListener implements ActionBar.TabListener{

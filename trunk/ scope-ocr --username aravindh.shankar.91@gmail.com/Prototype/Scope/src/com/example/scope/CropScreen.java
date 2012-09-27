@@ -1,11 +1,15 @@
 package com.example.scope;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,29 +18,48 @@ import android.widget.ImageView;
 public class CropScreen extends Activity {
 	private static final String TAG = "Scope.java";
 	public Bitmap myimage;
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "enter...");
 		setContentView(R.layout.cropscreen);
-		Log.v(TAG, "creating...");
+		Log.v(TAG, "cropscreen...");
 		final String filepath = getIntent().getStringExtra("file_path");
-		Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
+		String b = getIntent().getStringExtra("image_uri");
+		final Uri image_uri = Uri.parse(b);
+		Log.v(TAG, image_uri.toString());
+
+		try {
+			myimage = MediaStore.Images.Media.getBitmap(
+					this.getContentResolver(), image_uri);
+			// bmp =
+			// MediaStore.Images.Media.getBitmap(this.getContentResolver(),
+			// Uri.fromFile(file) );
+			// do whatever you want with the bitmap (Resize, Rename, Add To
+			// Gallery, etc)
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
 		ImageView imageView = (ImageView) findViewById(R.id.imgView);
-		imageView.setImageBitmap(yourSelectedImage);
+		imageView.setImageBitmap(myimage);
 
 		Button button_crop = (Button) findViewById(R.id.crop);
 		Button button_done = (Button) findViewById(R.id.done);
-		// Context a=getActivity();
-		final Context a = this;
-
+	    final Context a=this;
+		
 		button_crop.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Log.v(TAG, "crop clicked");
+				Log.v(TAG, "crop button clicked");
+				Log.v(TAG, image_uri.toString());
 				Intent intent = new Intent(a, Cropping.class);
 				intent.putExtra("file_path", filepath);
+				intent.putExtra("image_uri", image_uri.toString());
 				startActivity(intent);
 
 			}
@@ -46,6 +69,7 @@ public class CropScreen extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
 				
 
 			}
