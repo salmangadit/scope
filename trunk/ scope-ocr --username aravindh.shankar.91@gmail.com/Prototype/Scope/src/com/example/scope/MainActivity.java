@@ -31,6 +31,12 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		ActionBar ab = getActionBar();
+		ab.setTitle("Title");
+		ab.setDisplayShowTitleEnabled(false);
+		ab.setSubtitle("Subtitle");
+		ab.setDisplayShowTitleEnabled(false);
+
 		// Create any missing directories
 		String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
@@ -77,9 +83,9 @@ public class MainActivity extends Activity {
 								+ e.toString());
 			}
 		}
-		
+
 		setContentView(R.layout.activity_main);
-		
+
 		// ActionBar gets initiated
 		ActionBar actionbar = getActionBar();
 
@@ -98,7 +104,7 @@ public class MainActivity extends Activity {
 
 		// set the Tab listener. Now we can listen for clicks.
 		ScanTab.setTabListener(new TabListener(ScanFragment));
-		UploadTab.setTabListener(new TabListener(UploadFragment));	
+		UploadTab.setTabListener(new TabListener(UploadFragment));
 		SettingsTab.setTabListener(new TabListener(SettingsFragment));
 
 		// add the two tabs to the actionbar

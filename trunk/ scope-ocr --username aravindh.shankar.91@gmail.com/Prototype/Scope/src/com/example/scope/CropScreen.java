@@ -3,6 +3,7 @@ package com.example.scope;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -22,9 +23,15 @@ public class CropScreen extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		Log.v(TAG, "enter...");
 		setContentView(R.layout.cropscreen);
 		Log.v(TAG, "cropscreen...");
+		ActionBar ab = getActionBar();
+		ab.setTitle("Title");
+		ab.setDisplayShowTitleEnabled(false);
+		ab.setSubtitle("Subtitle");
+		ab.setDisplayShowTitleEnabled(false);
 		final String filepath = getIntent().getStringExtra("file_path");
 		String b = getIntent().getStringExtra("image_uri");
 		final Uri image_uri = Uri.parse(b);
@@ -69,9 +76,11 @@ public class CropScreen extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
-				
-
+				Log.v(TAG, "OCR button clicked");
+				Intent intent = new Intent(a, Ocrmain.class);
+				intent.putExtra("file_path", filepath);
+				intent.putExtra("image_uri", image_uri.toString());
+				startActivity(intent);
 			}
 		});
 

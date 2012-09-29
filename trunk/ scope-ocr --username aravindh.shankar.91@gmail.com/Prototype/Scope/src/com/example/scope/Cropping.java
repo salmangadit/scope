@@ -29,18 +29,12 @@ public class Cropping extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "enter...");
-		//setContentView(R.layout.cropping);
+
 		Log.v(TAG, "cropping...");
 		filepath = getIntent().getStringExtra("file_path");
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
-		// image_uri= Uri.parse(b);
-		// Uri image_uri = Uri.parse(intent.getStringExtra("image_uri"));
-		//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
-		//ImageView imageView = (ImageView) findViewById(R.id.imgView);
-		//imageView.setImageBitmap(yourSelectedImage);
-		// Log.v(TAG,b);
 
 		crop_here(image_uri);
 	}
@@ -54,8 +48,7 @@ public class Cropping extends Activity {
 			cropIntent.setDataAndType(outputFileUri, "image/*");
 			// set crop properties
 			cropIntent.putExtra("crop", "true");
-			// indicate aspect of desired crop
-			cropIntent.putExtra("aspectX", 1);
+			cropIntent.putExtra("aspectX", 1); 
 			cropIntent.putExtra("aspectY", 1);
 			// indicate output X and Y
 			cropIntent.putExtra("outputX", 256);
@@ -75,8 +68,9 @@ public class Cropping extends Activity {
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.v(TAG, "INSisss");
 		// Uri image_uri=data.getData();
+		Log.i(TAG, "resultCode: " + resultCode);
+		Log.i(TAG, "requestCode: " + requestCode);
 		if (resultCode == -1) {
 			if (requestCode == PIC_CROP) {
 				Bundle extras = data.getExtras();
@@ -88,6 +82,7 @@ public class Cropping extends Activity {
 
 				Bitmap thePic = extras.getParcelable("data");
 
+				//Storing cropped file in temporary location
 				File file = new File(
 						Environment
 								.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -104,11 +99,19 @@ public class Cropping extends Activity {
 				Log.v(TAG, uri.toString());
 
 				Log.v(TAG, thePic.toString());
+				filepath= file.getAbsolutePath();
 				Intent i = new Intent(this, CropScreen.class);
 				i.putExtra("file_path", filepath);
 				i.putExtra("image_uri", uri.toString());
 				startActivity(i);
 			}
+
+		} else if (resultCode == RESULT_CANCELED) {
+			Log.v(TAG, "cancelled");
+			Intent i = new Intent(this, CropScreen.class);
+			i.putExtra("file_path", filepath);
+			i.putExtra("image_uri", image_uri.toString());
+			startActivity(i);
 
 		}
 	}

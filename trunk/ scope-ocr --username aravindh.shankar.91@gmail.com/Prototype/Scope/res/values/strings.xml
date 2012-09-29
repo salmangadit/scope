@@ -8,15 +8,19 @@
     <color name="indigo">#4B0082</color>
     <color name="midnight_blue">#191970</color>
     <color name="gainsborough">#DCDCDC</color>
-
+    <color name="black">#000000</color>
+    
     <string name="title_activity_options">OptionsActivity</string>
     <string name="title_activity_edit">EditActivity</string>
     <string name="button_scan">SCAN</string>
     <string name="crop">Crop</string>
     <string name="done">Done</string>
+    <string name="ocr">OCR it!</string>
+    <string name="empty"></string>
     <string name="receive">Received</string>
     <string name="switch_preprocessor">Pre-Processing</string>
     <string name="save_settings">Save Settings</string>
     <string name="upload_file">From Gallery</string>
 
+    
 </resources>
