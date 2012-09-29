@@ -1,6 +1,7 @@
 package com.example.scope;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Fragment;
@@ -18,13 +19,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.googlecode.tesseract.android.TessBaseAPI;
-
 public class ScanFragment extends Fragment {
-	protected Button _button;
+	protected ImageButton _button;
 	protected static String _path;
 	protected boolean _taken;
 	public static final String lang = "eng";
@@ -45,7 +44,7 @@ public class ScanFragment extends Fragment {
 
 		// _image = (ImageView) findViewById(R.id.image);
 		// _field = (EditText) findViewById(R.id.field);
-		_button = (Button) view.findViewById(R.id.button_scan);
+		_button = (ImageButton) view.findViewById(R.id.image_camera);
 
 		Log.v(TAG, "HERE1");
 		if (_button == null)
@@ -62,7 +61,7 @@ public class ScanFragment extends Fragment {
 			startCameraActivity();
 		}
 	}
-	
+
 	public void startCameraActivity() {
 		File file = new File(_path);
 		outputFileUri = Uri.fromFile(file);
@@ -79,21 +78,20 @@ public class ScanFragment extends Fragment {
 		Log.i(TAG, "resultCode: " + resultCode);
 		Log.i(TAG, "requestCode: " + requestCode);
 		if (resultCode == -1) {
-			//user is returning from capturing an image using the camera
-    		if(requestCode == CAMERA_CAPTURE){
-    			//carry out the crop operation
-    			performCrop();
-    		}	
-			//user is returning from cropping the image
-			else if(requestCode == PIC_CROP){
-				//get the returned data
+			// user is returning from capturing an image using the camera
+			if (requestCode == CAMERA_CAPTURE) {
+				// carry out the crop operation
+				performCrop();
+			}
+			// user is returning from cropping the image
+			else if (requestCode == PIC_CROP) {
+				// get the returned data
 				Bundle extras = data.getExtras();
-				//get the cropped bitmap
+				// get the cropped bitmap
 				Bitmap thePic = extras.getParcelable("data");
 				onPhotoTaken(thePic);
 			}
-		} 
-		else {
+		} else {
 			Log.v(TAG, "User cancelled");
 		}
 	}
@@ -109,46 +107,45 @@ public class ScanFragment extends Fragment {
 			performCrop();
 		}
 	}
-	
-	private void performCrop()
-	{
+
+	private void performCrop() {
 		try {
-			//call the standard crop action intent (the user device may not support it)
+			// call the standard crop action intent (the user device may not
+			// support it)
 			Intent cropIntent = new Intent("com.android.camera.action.CROP");
-			    //indicate image type and Uri
+			// indicate image type and Uri
 			cropIntent.setDataAndType(outputFileUri, "image/*");
-			    //set crop properties
+			// set crop properties
 			cropIntent.putExtra("crop", "true");
-			    //indicate aspect of desired crop
 			cropIntent.putExtra("aspectX", 1);
 			cropIntent.putExtra("aspectY", 1);
-			    //indicate output X and Y
+			// indicate output X and Y
 			cropIntent.putExtra("outputX", 256);
 			cropIntent.putExtra("outputY", 256);
-			cropIntent.putExtra("scale", false);
-			    //retrieve data on return
+			cropIntent.putExtra("scale", true);
+			// retrieve data on return
 			cropIntent.putExtra("return-data", true);
-			    //start the activity - we handle returning in onActivityResult
+			// start the activity - we handle returning in onActivityResult
 			startActivityForResult(cropIntent, PIC_CROP);
-		}
-		catch(ActivityNotFoundException anfe){
-		    //display an error message
-		    String errorMessage = "Whoops - your device doesn't support the crop action!";
-		    Toast toast = Toast.makeText(getActivity().getApplicationContext(), errorMessage, Toast.LENGTH_SHORT);
-		    toast.show();
+		} catch (ActivityNotFoundException anfe) {
+			// display an error message
+			String errorMessage = "Whoops - your device doesn't support the crop action!";
+			Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+					errorMessage, Toast.LENGTH_SHORT);
+			toast.show();
 		}
 	}
 
 	protected void onPhotoTaken(Bitmap croppedPic) {
 		_taken = true;
 
-		//BitmapFactory.Options options = new BitmapFactory.Options();
-		//options.inSampleSize = 4;
+		// BitmapFactory.Options options = new BitmapFactory.Options();
+		// options.inSampleSize = 4;
 
-		//Bitmap bitmap = BitmapFactory.decodeFile(_path, options);
-		
+		// Bitmap bitmap = BitmapFactory.decodeFile(_path, options);
+
 		Bitmap bitmap = croppedPic;
-		
+
 		if (bitmap == null)
 			Log.v(TAG, _path);
 		try {
@@ -197,34 +194,55 @@ public class ScanFragment extends Fragment {
 		}
 
 		Context context = getActivity().getApplicationContext();
-		CharSequence text = "Photo taken! Now OCR that shiz!";
-		int duration = Toast.LENGTH_SHORT;
+		// CharSequence text = "Photo taken! Now OCR that shiz!";
+		// int duration = Toast.LENGTH_SHORT;
+		//
+		// Toast toast = Toast.makeText(context, text, duration);
+		// toast.show();
 
-		Toast toast = Toast.makeText(context, text, duration);
-		toast.show();
-		
-		TessBaseAPI baseApi = new TessBaseAPI();
-		
-		baseApi.setDebug(true);
-		baseApi.init(DATA_PATH, lang);
-		Log.v(TAG, "Before baseApi");
-		baseApi.setImage(bitmap);
-		Log.v(TAG, "Before baseApi2");
-		String recognizedText = baseApi.getUTF8Text();
-		Log.v(TAG, "Before baseApi3");
-		baseApi.end();
+		// Temporary storage for cropped image
+		File file = new File(
+				Environment
+						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+				"temp.bmp");
 
-		// You now have the text in recognizedText var, you can do anything with it.
-		// We will display a stripped out trimmed alpha-numeric version of it (if lang is eng)
-		// so that garbage doesn't make it to the display.
-
-		Log.v(TAG, "OCRED TEXT: " + recognizedText);
-
-		if ( lang.equalsIgnoreCase("eng") ) {
-			recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
+		try {
+			FileOutputStream out = new FileOutputStream(file);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		recognizedText = recognizedText.trim();
-		//Test1 H = new Test1();
+
+		// Passing intent over to Ocrmain class
+		Intent intent = new Intent(context, Ocrmain.class);
+		// intent.putExtra("file_path", filePath);
+		intent.putExtra("image_uri", Uri.fromFile(file).toString());
+		startActivity(intent);
+
+//		TessBaseAPI baseApi = new TessBaseAPI();
+//
+//		baseApi.setDebug(true);
+//		baseApi.init(DATA_PATH, lang);
+//		Log.v(TAG, "Before baseApi");
+//		baseApi.setImage(bitmap);
+//		Log.v(TAG, "Before baseApi2");
+//		String recognizedText = baseApi.getUTF8Text();
+//		Log.v(TAG, "Before baseApi3");
+//		baseApi.end();
+//
+//		// You now have the text in recognizedText var, you can do anything with
+//		// it.
+//		// We will display a stripped out trimmed alpha-numeric version of it
+//		// (if lang is eng)
+//		// so that garbage doesn't make it to the display.
+//
+//		Log.v(TAG, "OCRED TEXT: " + recognizedText);
+//
+//		if (lang.equalsIgnoreCase("eng")) {
+//			recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
+//		}
+//
+//		recognizedText = recognizedText.trim();
+//		// Test1 H = new Test1();
 	}
 }

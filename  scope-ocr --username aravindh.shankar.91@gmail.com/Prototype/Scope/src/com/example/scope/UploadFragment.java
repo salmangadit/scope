@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 public class UploadFragment extends Fragment {
 
@@ -20,7 +20,7 @@ public class UploadFragment extends Fragment {
 	private static int RESULT_LOAD_IMAGE = 1;
 	// setContentView(R.layout.uploadfragment.xml);
 	private static final String TAG = "Scope.java";
-	protected static Button _button;
+	protected static ImageButton _button;
 	public final int RESULT_OK = -1;
     public static Bitmap myimage;
 	
@@ -38,7 +38,7 @@ public class UploadFragment extends Fragment {
 	// Listening for button events
 	public void upload_file(View view) {
 
-		_button = (Button) view.findViewById(R.id.button_upload);
+		_button = (ImageButton) view.findViewById(R.id.image_upload);
 		_button.setOnClickListener(new ButtonClickHandler());
 
 	}
