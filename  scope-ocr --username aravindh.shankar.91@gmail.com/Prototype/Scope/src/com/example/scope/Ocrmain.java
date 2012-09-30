@@ -92,7 +92,7 @@ public class Ocrmain extends Activity {
 		boolean deleted = file.delete();
 		Log.i(TAG, "File deleted: "+deleted);
 		
-		Intent intent = new Intent(this, MainActivity.class);
+		Intent intent = new Intent(this, Contacts.class);
 		startActivity(intent);
 	}
 }
