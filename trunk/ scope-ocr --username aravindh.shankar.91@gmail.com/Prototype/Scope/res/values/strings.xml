@@ -9,7 +9,8 @@
     <color name="midnight_blue">#191970</color>
     <color name="gainsborough">#DCDCDC</color>
     <color name="black">#000000</color>
-    
+    <color name="white">#FFFFFF</color>
+
     <string name="title_activity_options">OptionsActivity</string>
     <string name="title_activity_edit">EditActivity</string>
     <string name="button_scan">SCAN</string>
@@ -21,6 +22,13 @@
     <string name="switch_preprocessor">Pre-Processing</string>
     <string name="save_settings">Save Settings</string>
     <string name="upload_file">From Gallery</string>
-
+    <string name="title_activity_contacts">Add to Contacts</string>
     
+    <string name="hnt_et_name">Display Name</string>
+    <string name="hnt_et_mobile_phone">Mobile Phone</string>
+    <string name="hnt_et_home_phone">Home Phone</string>
+    <string name="hnt_et_home_email">Home Email</string>
+    <string name="hnt_et_work_email">Work Email</string>
+    <string name="str_btn_add">Add Contact</string>
+    <string name="str_btn_contacts">Open Contacts List</string>
 </resources>
