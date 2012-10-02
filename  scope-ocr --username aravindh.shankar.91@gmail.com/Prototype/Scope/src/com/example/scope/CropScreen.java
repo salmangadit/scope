@@ -51,6 +51,8 @@ public class CropScreen extends Activity {
 			e.printStackTrace();
 		}
 
+		Log.v(TAG,"Myimageeeeee Size:"+myimage.getByteCount());
+		
 		//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filepath);
 		ImageView imageView = (ImageView) findViewById(R.id.imgView);
 		imageView.setImageBitmap(myimage);
@@ -77,7 +79,7 @@ public class CropScreen extends Activity {
 			@Override
 			public void onClick(View v) {
 				Log.v(TAG, "OCR button clicked");
-				Intent intent = new Intent(a, Ocrmain.class);
+				Intent intent = new Intent(a, PreProcess.class);
 				intent.putExtra("file_path", filepath);
 				intent.putExtra("image_uri", image_uri.toString());
 				startActivity(intent);
