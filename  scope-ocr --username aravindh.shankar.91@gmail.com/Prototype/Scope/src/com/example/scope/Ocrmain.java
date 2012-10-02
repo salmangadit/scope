@@ -7,6 +7,7 @@ import java.io.IOException;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -60,10 +61,10 @@ public class Ocrmain extends Activity {
 //        argb = argb.copy(Bitmap.Config.ARGB_8888, true);
 //        Log.v(TAG, "bitmap after argb:" + argb.getByteCount());
 //        
-//		BitmapFactory.Options opt = new BitmapFactory.Options();
-//        opt.inSampleSize = 2;
-//        myimage = BitmapFactory.decodeFile(filepath, opt);
-//        Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
+		BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inSampleSize = 2;
+        myimage = BitmapFactory.decodeFile(filepath, opt);
+        Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
 		
         //TessBase starts
 		TessBaseAPI baseApi = new TessBaseAPI();

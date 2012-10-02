@@ -10,7 +10,9 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -18,6 +20,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 
 public class PreProcess extends Activity {
 
@@ -39,17 +44,20 @@ public class PreProcess extends Activity {
 		Log.v(TAG, "enter...");
 		Log.v(TAG, "Preprocess...");
 
+		setContentView(R.layout.cropping);
+		ActionBar ab = getActionBar();
+		ab.setTitle("Title");
+		ab.setDisplayShowTitleEnabled(false);
+		ab.setSubtitle("Subtitle");
+		ab.setDisplayShowTitleEnabled(false);
 		// Intent input
 		filepath = getIntent().getStringExtra("file_path");
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
-
-		pre_process();
-	}
-
-	public void pre_process() {
-
+		
+		///Preprocesss
+		
 		Mat src = new Mat();
 		Mat dst = new Mat();
 
@@ -74,6 +82,7 @@ public class PreProcess extends Activity {
 		Imgproc.equalizeHist(dst1, dst1);
 		Log.v(TAG, "not screwed2");
 		Utils.matToBitmap(dst1, ppimage);
+		
 
 		Log.v(TAG, "Myimage Size:" + myimage.getByteCount());
 		Log.v(TAG, "PPimage Size:" + ppimage.getByteCount());
@@ -91,14 +100,28 @@ public class PreProcess extends Activity {
 			e.printStackTrace();
 		}
 
-		Uri uri = Uri.fromFile(file);
+		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
+		
+		
+		ImageView imageView = (ImageView) findViewById(R.id.imgView);
+		imageView.setImageBitmap(ppimage);
+		Button button_done = (Button) findViewById(R.id.button1);
+		
+		final Context a = this;
+		
+		button_done.setOnClickListener(new View.OnClickListener() {
 
-		Intent i = new Intent(this, Ocrmain.class);
-		i.putExtra("file_path", filepath);
-		i.putExtra("image_uri", uri.toString());
-		startActivity(i);
-
+			@Override
+			public void onClick(View v) {
+				Log.v(TAG, "Done button clicked");
+				Intent i = new Intent(a, Ocrmain.class);
+				i.putExtra("file_path", filepath);
+				i.putExtra("image_uri", uri.toString());
+				startActivity(i);
+			
+			}
+		});
+		
 	}
-
 }
