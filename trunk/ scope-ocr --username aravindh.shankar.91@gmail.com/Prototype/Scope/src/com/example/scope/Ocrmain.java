@@ -56,8 +56,16 @@ public class Ocrmain extends Activity {
 			e.printStackTrace();
 		}
 		Log.v(TAG, "bitmap " + myimage.getByteCount());
+//        Bitmap argb = myimage;
+//        argb = argb.copy(Bitmap.Config.ARGB_8888, true);
+//        Log.v(TAG, "bitmap after argb:" + argb.getByteCount());
+//        
+//		BitmapFactory.Options opt = new BitmapFactory.Options();
+//        opt.inSampleSize = 2;
+//        myimage = BitmapFactory.decodeFile(filepath, opt);
+//        Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
 		
-		//TessBase starts
+        //TessBase starts
 		TessBaseAPI baseApi = new TessBaseAPI();
 
 		baseApi.setDebug(true);

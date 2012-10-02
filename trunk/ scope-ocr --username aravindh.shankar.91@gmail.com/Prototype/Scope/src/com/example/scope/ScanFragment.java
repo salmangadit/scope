@@ -214,7 +214,7 @@ public class ScanFragment extends Fragment {
 		}
 
 		// Passing intent over to Ocrmain class
-		Intent intent = new Intent(context, Ocrmain.class);
+		Intent intent = new Intent(context, PreProcess.class);
 		// intent.putExtra("file_path", filePath);
 		intent.putExtra("image_uri", Uri.fromFile(file).toString());
 		startActivity(intent);
