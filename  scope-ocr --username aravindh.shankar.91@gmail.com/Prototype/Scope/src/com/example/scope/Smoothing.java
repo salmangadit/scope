@@ -1,7 +1,9 @@
 package com.example.scope;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -13,6 +15,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 /* Class: Smoothing
@@ -42,6 +45,7 @@ public class Smoothing {
 	Mat src;
 	Mat dst;
 	Bitmap destImage = null;
+	Bitmap sourceImage = null;
 
 	static int MAX_KERNEL_LENGTH = 31;
 
@@ -51,11 +55,14 @@ public class Smoothing {
 	public Smoothing(Context c, Uri inputUri) {
 		currContext = c;
 		inputImageUri = inputUri;
+
+		FixImageProperties();
 	}
 
 	// Method to set image only, if class has already been instantiated
 	public void SetImage(Uri inputUri) {
 		inputImageUri = inputUri;
+		FixImageProperties();
 	}
 
 	/*
@@ -132,6 +139,23 @@ public class Smoothing {
 
 		return getBitmapUri(destImage);
 	}
+	
+	private void FixImageProperties(){
+		try {
+			sourceImage = MediaStore.Images.Media.getBitmap(
+					currContext.getContentResolver(), inputImageUri);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.v(TAG, "NULL");
+			e.printStackTrace();
+		}
+		
+		destImage = sourceImage;
+
+		Utils.bitmapToMat(sourceImage, src);
+		dst = Mat.zeros(src.size(), src.type());
+	}
 
 	// Private method to retrieve the URI of the converted image
 	private Uri getBitmapUri(Bitmap image) {
@@ -153,4 +177,3 @@ public class Smoothing {
 		return uri;
 	}
 }
-
