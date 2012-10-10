@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.opencv.android.Utils;
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
@@ -42,8 +43,8 @@ import android.util.Log;
 public class Smoothing {
 	Uri inputImageUri;
 	Context currContext;
-	Mat src;
-	Mat dst;
+	Mat src=new Mat();
+	Mat dst=new Mat();
 	Bitmap destImage = null;
 	Bitmap sourceImage = null;
 
@@ -130,11 +131,20 @@ public class Smoothing {
 	 * /Bilateral_Filtering.html
 	 */
 	public Uri BilateralFilter() {
-		Log.v(TAG, "null2");
+		Mat destImageMat_temp = new Mat();
+		Imgproc.cvtColor(src, destImageMat_temp, Imgproc.COLOR_RGBA2RGB, 0);
+		
+		Log.v(TAG, "Start bilateral");
 		for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2) {
-			Imgproc.bilateralFilter(src, dst, i, i * 2, i / 2);
+			try {
+			Imgproc.bilateralFilter(destImageMat_temp, dst, i, i * 2, i / 2);
+			} catch (CvException e) {
+				Log.v(TAG, e.getMessage());
+			}
 		}
-
+		Log.v(TAG, "End bilateral, start convert");
+		Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGB2RGBA, 0);
+		Log.v(TAG, "End convert");
 		Utils.matToBitmap(dst, destImage);
 
 		return getBitmapUri(destImage);
@@ -152,8 +162,9 @@ public class Smoothing {
 		}
 		
 		destImage = sourceImage;
-
+		
 		Utils.bitmapToMat(sourceImage, src);
+		Log.v(TAG, "Bitmapped the matrix!");	
 		dst = Mat.zeros(src.size(), src.type());
 	}
 

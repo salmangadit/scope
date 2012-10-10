@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -67,6 +68,7 @@ public class Brightness {
 		beta = betaPercentage;
 		
 		Mat sourceImageMat = new Mat();
+		Mat destImageMat_temp = new Mat();
 		Mat destImageMat = new Mat();
 		
 		Bitmap sourceImage = null;
@@ -81,15 +83,18 @@ public class Brightness {
 			Log.v(TAG, "NULL");
 			e.printStackTrace();
 		}
+		
+		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
 
 		destImage = sourceImage;
 
 		Utils.bitmapToMat(sourceImage, sourceImageMat);
-		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
-		destImageMat.convertTo(destImageMat, -1, 1, beta);
-		Utils.matToBitmap(destImageMat, destImage);
+		Imgproc.cvtColor(sourceImageMat, destImageMat_temp, Imgproc.COLOR_RGB2BGRA, 0);
+		Imgproc.cvtColor(destImageMat_temp, destImageMat, Imgproc.COLOR_BGRA2RGBA, 0);
+		Mat final_dest_mat = Mat.zeros(destImageMat.size(), destImageMat.type());
+		destImageMat.convertTo(final_dest_mat, -1, 1, beta);
+		Utils.matToBitmap(final_dest_mat, destImage);
 
-		Log.v(TAG, "sourceImage Size:" + sourceImage.getByteCount());
 		Log.v(TAG, "destImage Size:" + destImage.getByteCount());
 		
 		File file = new File(
