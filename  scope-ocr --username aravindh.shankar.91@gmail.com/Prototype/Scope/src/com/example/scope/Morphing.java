@@ -70,6 +70,7 @@ public class Morphing {
 	// Input beta value for brightness as a percentage
 	public Uri erode(double matrixPercentage) {
 		
+		
 		if (matrixPercentage > 100)
 			matrixPercentage = 100;
 		else if (matrixPercentage < -100)
