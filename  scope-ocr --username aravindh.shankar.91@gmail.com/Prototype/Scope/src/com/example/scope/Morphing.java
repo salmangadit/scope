@@ -72,7 +72,7 @@ public class Morphing {
 		
 		if (matrixPercentage > 100)
 			matrixPercentage = 100;
-		else if (matrixPercentage < 100)
+		else if (matrixPercentage < -100)
 			matrixPercentage = -100;
 		
 		matrix_size = matrixPercentage/10;
