@@ -9,6 +9,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -16,32 +17,24 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-/* Class: Contrast
+/* Class: Greyscale
  * Author: Aravindh
  * 
  * Description:
  * A general image processing operator is a function that takes one or more input images 
  * and produces an output image.
- * In this kind of image processing transform, each output pixel’s value depends on only 
- * the corresponding input pixel value (plus, potentially, some globally collected information 
- * or parameters).
+ * In this image processing transform, an RGB input bitmap image is converted 
+ * into a grey-scaled output bitmap image of the same size. 
  * 
- * This class tries to increase the contrast in an image by multiplying the pixels by a constant float value.
- * out_mat(x,y) = inp_mat(x,y)*alpha
- * alpha at 1, means the output image is the same as input
+ * Methods return a uri to the grey-scaled image
  * 
- * Normal image is at 20% contrast
- * 100% is capped at alpha = 3, otherwise image becomes too white
- * 0% starts at alpha = 0.5
- * 
- * Input bitmap size = Output bitmap size
- *
  * Sample usage code:
- * Contrast contrast = new Contrast(context, inputImageUri);
- * Uri contrastImage = contrast.contrast_change(30); //30% change in contrast
+ * Greyscale grey = new Greyscale(this.getApplicationContext(), Uri.parse(path));
+ * Uri ppimage=grey.greyscale();
  */
 
-public class Contrast {
+@TargetApi(12)
+public class Greyscale {
 	double alpha;
 	Uri inputImageUri;
 	Context currContext;
@@ -49,7 +42,7 @@ public class Contrast {
 	private static final String TAG = "Scope.java";
 	
 	// Constructor
-	public Contrast(Context c, Uri inputUri)
+	public Greyscale(Context c, Uri inputUri)
 	{
 		currContext = c;
 		inputImageUri = inputUri;
@@ -61,19 +54,10 @@ public class Contrast {
 		inputImageUri = inputUri;
 	}
 	
-	// Input alpha value for contrast as a percentage
-	public Uri contrast_change(double alphaPercentage) {
-		
-		if (alphaPercentage > 100)
-			alphaPercentage = 3;
-		else if (alphaPercentage < 0)
-			alphaPercentage = 0.5;
-		
-		alpha = 0.5 + alphaPercentage/40;
+	//Function to greyscale the image
+	public Uri greyscale() {
 		
 		Mat sourceImageMat = new Mat();
-		Mat destImageMat_temp = new Mat();
-		Mat destImageMat = new Mat();
 		
 		Bitmap sourceImage = null;
 		Bitmap destImage = null;
@@ -93,10 +77,8 @@ public class Contrast {
 		destImage=sourceImage;
 		
 		Utils.bitmapToMat(sourceImage, sourceImageMat);
-		Imgproc.cvtColor(sourceImageMat, destImageMat_temp, Imgproc.COLOR_RGB2BGRA, 0);
-		Imgproc.cvtColor(destImageMat_temp, destImageMat, Imgproc.COLOR_BGRA2RGBA, 0);
-		Mat final_dest_mat = Mat.zeros(destImageMat.size(), destImageMat.type());
-		destImageMat.convertTo(final_dest_mat, -1, alpha, 0);
+		Mat final_dest_mat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
+		Imgproc.cvtColor(sourceImageMat, final_dest_mat, Imgproc.COLOR_RGB2GRAY);
 		Utils.matToBitmap(final_dest_mat, destImage);
 		
 		Log.v(TAG, "destImage Size: " + destImage.getByteCount());
