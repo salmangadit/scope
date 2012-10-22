@@ -44,7 +44,7 @@ import android.util.Log;
  *
  * Sample usage code:
  * Morphing morphing = new Morphing(context, inputImageUri);
- * Uri morphedImage = morphing.erode(30) //erode using matrix size (3,3)
+ * Uri morphedImage = morphing.erode(30); //erode using matrix size (3,3)
  */
 
 public class Morphing {
@@ -67,7 +67,7 @@ public class Morphing {
 		inputImageUri = inputUri;
 	}
 	
-	// Input beta value for brightness as a percentage
+	// Input value for morphing as a percentage
 	public Uri erode(double matrixPercentage) {
 		
 		
