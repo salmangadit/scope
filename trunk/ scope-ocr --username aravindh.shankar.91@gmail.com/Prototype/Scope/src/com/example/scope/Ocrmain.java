@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,7 +43,7 @@ public class Ocrmain extends Activity {
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
-
+	    
 		ocr_main();
 	}
 
@@ -85,7 +86,6 @@ public class Ocrmain extends Activity {
 		String recognizedText = baseApi.getUTF8Text();
 		Log.v(TAG, "Before baseApi3");
 		baseApi.end();
-
 
 		Log.v(TAG, "OCRED TEXT: " + recognizedText);
 

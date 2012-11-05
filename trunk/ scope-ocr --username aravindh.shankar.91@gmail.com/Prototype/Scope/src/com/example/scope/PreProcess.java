@@ -55,25 +55,28 @@ public class PreProcess extends Activity {
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
-		
-		///Preprocesss
-		
+
+		// /Preprocesss
+
 		Mat src = new Mat();
 		Mat dst = new Mat();
 
-		try {
-			myimage = MediaStore.Images.Media.getBitmap(
-					this.getContentResolver(), image_uri);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			Log.v(TAG, "NULL");
-			e.printStackTrace();
-		}
+		// try {
+		// myimage = MediaStore.Images.Media.getBitmap(
+		// this.getContentResolver(), image_uri);
+		// } catch (FileNotFoundException e) {
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// Log.v(TAG, "NULL");
+		// e.printStackTrace();
+		// }
 
+		BitmapHandler bitmaphandler = new BitmapHandler(this.getApplicationContext());
+		myimage = bitmaphandler.decodeFileAsPath(filepath);
+		
 		ppimage = myimage;
 		Log.v(TAG, "not screwed");
-
+		//Log.v(TAG, "Myimage Size:" + myimage.getByteCount());
 		Utils.bitmapToMat(myimage, src);
 		Log.v(TAG, "not screwed1");
 		Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2GRAY, 0);
@@ -82,9 +85,8 @@ public class PreProcess extends Activity {
 		Imgproc.equalizeHist(dst1, dst1);
 		Log.v(TAG, "not screwed2");
 		Utils.matToBitmap(dst1, ppimage);
-		
 
-		Log.v(TAG, "Myimage Size:" + myimage.getByteCount());
+		
 		Log.v(TAG, "PPimage Size:" + ppimage.getByteCount());
 
 		File file = new File(
@@ -102,14 +104,13 @@ public class PreProcess extends Activity {
 
 		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
-		
-		
+
 		ImageView imageView = (ImageView) findViewById(R.id.imgView);
 		imageView.setImageBitmap(ppimage);
 		Button button_done = (Button) findViewById(R.id.button1);
-		
+
 		final Context a = this;
-		
+
 		button_done.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -119,9 +120,9 @@ public class PreProcess extends Activity {
 				i.putExtra("file_path", filepath);
 				i.putExtra("image_uri", uri.toString());
 				startActivity(i);
-			
+
 			}
 		});
-		
+
 	}
 }

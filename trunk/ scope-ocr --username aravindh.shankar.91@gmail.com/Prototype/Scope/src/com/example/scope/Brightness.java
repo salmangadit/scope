@@ -112,6 +112,8 @@ public class Brightness {
 
 		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
+		sourceImage.recycle();
+		sourceImage = null;
 		
 		return uri;
 	}
