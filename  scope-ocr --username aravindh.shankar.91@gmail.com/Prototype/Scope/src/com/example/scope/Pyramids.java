@@ -115,6 +115,8 @@ public class Pyramids {
 		
 		store();
 		Log.v(TAG, uri.toString());
+		sourceImage.recycle();
+		sourceImage = null;
 		return uri;
 	}
 	

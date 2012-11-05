@@ -23,6 +23,7 @@ public final class R {
         public static final int ic_action_search=0x7f020002;
         public static final int ic_launcher=0x7f020003;
         public static final int segoe=0x7f020004;
+        public static final int splash=0x7f020005;
     }
     public static final class id {
         public static final int btn_add=0x7f080005;
@@ -37,10 +38,11 @@ public final class R {
         public static final int et_name=0x7f080000;
         public static final int et_work_email=0x7f080003;
         public static final int fragment_container=0x7f080007;
+        public static final int imageView1=0x7f08000f;
         public static final int image_camera=0x7f08000c;
-        public static final int image_upload=0x7f08000f;
+        public static final int image_upload=0x7f080010;
         public static final int imgView=0x7f080008;
-        public static final int menu_settings=0x7f080010;
+        public static final int menu_settings=0x7f080011;
         public static final int switch1=0x7f08000d;
     }
     public static final class layout {
@@ -50,7 +52,8 @@ public final class R {
         public static final int cropscreen=0x7f030003;
         public static final int scanfragment=0x7f030004;
         public static final int settingsfragment=0x7f030005;
-        public static final int uploadfragment=0x7f030006;
+        public static final int splashscreen=0x7f030006;
+        public static final int uploadfragment=0x7f030007;
     }
     public static final class menu {
         public static final int activity_contacts=0x7f070000;
