@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -96,10 +95,10 @@ public class Ocrmain extends Activity {
 		//recognizedText is the final OCRed text
 		recognizedText = recognizedText.trim();
 
-		String ocrtext = "And...BAM! OCRed: " + recognizedText;
-		Toast toast = Toast.makeText(this.getApplicationContext(), ocrtext,
-				Toast.LENGTH_LONG);
-		toast.show();
+//		String ocrtext = "And...BAM! OCRed: " + recognizedText;
+//		Toast toast = Toast.makeText(this.getApplicationContext(), ocrtext,
+//				Toast.LENGTH_LONG);
+//		toast.show();
 		
 		//deleting temporary crop file created
 		File file = new File(
@@ -109,7 +108,11 @@ public class Ocrmain extends Activity {
 		boolean deleted = file.delete();
 		Log.i(TAG, "File deleted: "+deleted);
 		
-		Intent intent = new Intent(this, Contacts.class);
+		Intent intent = new Intent(this, ResultActivity.class);
+		intent.putExtra("ocrText", recognizedText);
 		startActivity(intent);
+		
+//		Intent intent = new Intent(this, Contacts.class);
+//		startActivity(intent);
 	}
 }
