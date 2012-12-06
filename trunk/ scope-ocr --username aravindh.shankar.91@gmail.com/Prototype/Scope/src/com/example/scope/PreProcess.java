@@ -1,7 +1,9 @@
 package com.example.scope;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.opencv.android.OpenCVLoader;
 
@@ -13,6 +15,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -50,25 +53,40 @@ public class PreProcess extends Activity {
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
+//		Bitmap sourceImage = null;
 		
-		BitmapHandler bitmaphandler = new BitmapHandler(this.getApplicationContext());
-		myimage = bitmaphandler.decodeFileAsPath(filepath);
+//		BitmapHandler bitmaphandler = new BitmapHandler(this.getApplicationContext());
+//		myimage = bitmaphandler.decodeFileAsPath(filepath);
 		
-		File file = new File(
-				Environment
-						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
-
-		try {
-			FileOutputStream out = new FileOutputStream(file);
-			myimage.compress(Bitmap.CompressFormat.PNG, 90, out);
-		} catch (Exception e) {
-			Log.v(TAG, "null2");
-			e.printStackTrace();
-		}
+//		try {
+//			sourceImage = MediaStore.Images.Media.getBitmap(
+//					getContentResolver(), image_uri);
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			Log.v(TAG, "NULL");
+//			e.printStackTrace();
+//		}
+//
+//		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
+//		
+//		
+//		File file = new File(
+//				Environment
+//						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+//				"temp.bmp");
+//
+//		try {
+//			FileOutputStream out = new FileOutputStream(file);
+//			sourceImage.compress(Bitmap.CompressFormat.PNG, 90, out);
+//		} catch (Exception e) {
+//			Log.v(TAG, "null2");
+//			e.printStackTrace();
+//		}
 
 		final Uri uri, process_uri_1,process_uri_2;
-		uri = Uri.fromFile(file);
+		uri = image_uri;
+		//uri = Uri.fromFile(file);
 	
 //		Morphing morphing = new Morphing(this.getApplicationContext(),uri);
 //		process_uri_1 = morphing.erode(-20);

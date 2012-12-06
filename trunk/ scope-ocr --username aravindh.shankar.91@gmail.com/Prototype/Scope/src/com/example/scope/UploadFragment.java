@@ -90,13 +90,16 @@ public class UploadFragment extends Fragment {
 			Log.v(TAG, "9.. Pass");
 			Log.v(TAG, filePath);
  
+			EdgeDetection detector = new EdgeDetection(a, filePath);
+			Uri EdgeDetectedImage = detector.EdgeDetect();
+			
 			//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filePath);
 			//Log.v(TAG, "Image Selected");
 		    //myimage=yourSelectedImage;	
 			
 			Intent intent = new Intent(a, CropScreen.class);
 			intent.putExtra("file_path", filePath);
-			intent.putExtra("image_uri",selectedImage.toString() );
+			intent.putExtra("image_uri",EdgeDetectedImage.toString() );
 			startActivity(intent);
 		    
 		}
