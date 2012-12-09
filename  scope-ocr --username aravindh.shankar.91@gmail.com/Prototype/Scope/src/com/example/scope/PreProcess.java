@@ -35,6 +35,7 @@ public class PreProcess extends Activity {
 	public Bitmap ppimage;
 	public Uri image_uri;
 	public String filepath;
+	public Uri result_uri = null;
 	
 	
 	public void onCreate(Bundle savedInstanceState) {
@@ -84,25 +85,15 @@ public class PreProcess extends Activity {
 //			e.printStackTrace();
 //		}
 
-		final Uri uri, process_uri_1,process_uri_2;
+		final Uri uri;
 		uri = image_uri;
 		//uri = Uri.fromFile(file);
 	
 //		Morphing morphing = new Morphing(this.getApplicationContext(),uri);
 //		process_uri_1 = morphing.erode(-20);
-		
-		Smoothing smoother = new Smoothing(this.getApplicationContext(),uri);
-		process_uri_1 = smoother.BilateralFilter();
-	
-		Threshold thresh = new Threshold(this.getApplicationContext(),process_uri_1 );
-		double value = thresh.otsu();
-		Log.v(TAG,"otsu  "+value);
-		process_uri_2 = thresh.thresh_binary(value,255);
-		
-		Log.v(TAG, process_uri_2.toString());
+		//ImageView imageView = (ImageView) findViewById(R.id.imgView);
+		new PreProcessAsync(uri, this).execute();
 
-		ImageView imageView = (ImageView) findViewById(R.id.imgView);
-		imageView.setImageURI(process_uri_2);
 		Button button_done = (Button) findViewById(R.id.button1);
 
 		final Context a = this;
@@ -114,11 +105,16 @@ public class PreProcess extends Activity {
 				Log.v(TAG, "Done button clicked");
 				Intent i = new Intent(a, Ocrmain.class);
 				i.putExtra("file_path", filepath);
-				i.putExtra("image_uri", process_uri_2.toString());
+				i.putExtra("image_uri", result_uri.toString());
 				startActivity(i);
 
 			}
 		});
 
+	}
+	
+	public void setImageURI(Uri uri){
+		ImageView imageView = (ImageView) findViewById(R.id.imgView);
+		imageView.setImageURI(uri);
 	}
 }

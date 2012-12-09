@@ -9,6 +9,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -81,15 +82,19 @@ public class ScanFragment extends Fragment {
 			// user is returning from capturing an image using the camera
 			if (requestCode == CAMERA_CAPTURE) {
 				// carry out the crop operation
-				performCrop();
+				//performCrop();
+				// Bundle extras = data.getExtras();
+				// get the cropped bitmap
+				// Bitmap thePic = extras.getParcelable("data");
+			    onPhotoTaken();
 			}
 			// user is returning from cropping the image
 			else if (requestCode == PIC_CROP) {
 				// get the returned data
-				Bundle extras = data.getExtras();
+				//Bundle extras = data.getExtras();
 				// get the cropped bitmap
-				Bitmap thePic = extras.getParcelable("data");
-				onPhotoTaken(thePic);
+				//Bitmap thePic = extras.getParcelable("data");
+				//onPhotoTaken(thePic);
 			}
 		} else {
 			Log.v(TAG, "User cancelled");
@@ -136,15 +141,18 @@ public class ScanFragment extends Fragment {
 		}
 	}
 
-	protected void onPhotoTaken(Bitmap croppedPic) {
+	protected void onPhotoTaken() {
 		_taken = true;
 
 		// BitmapFactory.Options options = new BitmapFactory.Options();
 		// options.inSampleSize = 4;
+		Context context = getActivity().getApplicationContext();
 
-		// Bitmap bitmap = BitmapFactory.decodeFile(_path, options);
-
-		Bitmap bitmap = croppedPic;
+		//Bitmap bitmap = BitmapFactory.decodeFile(_path);
+		BitmapHandler bitmaphandler = new BitmapHandler(context);
+		Bitmap bitmap = bitmaphandler.decodeFileAsPath(_path);
+		// destImage = sourceImage;
+		//Bitmap bitmap = croppedPic;
 
 		if (bitmap == null)
 			Log.v(TAG, _path);
@@ -193,7 +201,7 @@ public class ScanFragment extends Fragment {
 			Log.e(TAG, "Couldn't correct orientation: " + e.toString());
 		}
 
-		Context context = getActivity().getApplicationContext();
+		// Context context = getActivity().getApplicationContext();
 		// CharSequence text = "Photo taken! Now OCR that shiz!";
 		// int duration = Toast.LENGTH_SHORT;
 		//
@@ -205,6 +213,7 @@ public class ScanFragment extends Fragment {
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
 				"temp.bmp");
+		String filepath = file.getAbsolutePath();
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);
@@ -213,36 +222,41 @@ public class ScanFragment extends Fragment {
 			e.printStackTrace();
 		}
 
+		EdgeDetection detector = new EdgeDetection(context, filepath);
+		Uri EdgeDetectedImage = detector.EdgeDetect();
+
 		// Passing intent over to Ocrmain class
-		Intent intent = new Intent(context, PreProcess.class);
+		Intent intent = new Intent(context, CropScreen.class);
 		// intent.putExtra("file_path", filePath);
 		intent.putExtra("image_uri", Uri.fromFile(file).toString());
+		intent.putExtra("file_path", EdgeDetectedImage.toString());
 		startActivity(intent);
 
-//		TessBaseAPI baseApi = new TessBaseAPI();
-//
-//		baseApi.setDebug(true);
-//		baseApi.init(DATA_PATH, lang);
-//		Log.v(TAG, "Before baseApi");
-//		baseApi.setImage(bitmap);
-//		Log.v(TAG, "Before baseApi2");
-//		String recognizedText = baseApi.getUTF8Text();
-//		Log.v(TAG, "Before baseApi3");
-//		baseApi.end();
-//
-//		// You now have the text in recognizedText var, you can do anything with
-//		// it.
-//		// We will display a stripped out trimmed alpha-numeric version of it
-//		// (if lang is eng)
-//		// so that garbage doesn't make it to the display.
-//
-//		Log.v(TAG, "OCRED TEXT: " + recognizedText);
-//
-//		if (lang.equalsIgnoreCase("eng")) {
-//			recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
-//		}
-//
-//		recognizedText = recognizedText.trim();
-//		// Test1 H = new Test1();
+		// TessBaseAPI baseApi = new TessBaseAPI();
+		//
+		// baseApi.setDebug(true);
+		// baseApi.init(DATA_PATH, lang);
+		// Log.v(TAG, "Before baseApi");
+		// baseApi.setImage(bitmap);
+		// Log.v(TAG, "Before baseApi2");
+		// String recognizedText = baseApi.getUTF8Text();
+		// Log.v(TAG, "Before baseApi3");
+		// baseApi.end();
+		//
+		// // You now have the text in recognizedText var, you can do anything
+		// with
+		// // it.
+		// // We will display a stripped out trimmed alpha-numeric version of it
+		// // (if lang is eng)
+		// // so that garbage doesn't make it to the display.
+		//
+		// Log.v(TAG, "OCRED TEXT: " + recognizedText);
+		//
+		// if (lang.equalsIgnoreCase("eng")) {
+		// recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
+		// }
+		//
+		// recognizedText = recognizedText.trim();
+		// // Test1 H = new Test1();
 	}
 }
