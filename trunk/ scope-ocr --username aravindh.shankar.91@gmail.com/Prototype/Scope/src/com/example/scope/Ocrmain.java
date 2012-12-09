@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
@@ -28,6 +27,7 @@ public class Ocrmain extends Activity {
 	public Uri image_uri;
 	public static final String DATA_PATH = Environment
 			.getExternalStorageDirectory().toString() + "/Scope/";
+	public String recognizedText = null;
 
 	public String filepath;
 	public Bitmap my_image;
@@ -47,72 +47,16 @@ public class Ocrmain extends Activity {
 	}
 
 	public void ocr_main() {
-		Log.v(TAG, "entering tess");
-
-		// Getting uri of image/cropped image
-		try {
-			myimage = MediaStore.Images.Media.getBitmap(
-					this.getContentResolver(), image_uri);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
-		InputStream input=null;
-		try{
-		input = this.getContentResolver().openInputStream(image_uri);
-		}catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
-		
-		Log.v(TAG, "bitmap before comp: " + myimage.getByteCount());
-		BitmapFactory.Options opt = new BitmapFactory.Options();
-        //opt.inSampleSize = 2;
-        opt.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        myimage = BitmapFactory.decodeStream(input, null, opt);
-        Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
-		
-        //TessBase starts
-		TessBaseAPI baseApi = new TessBaseAPI();
+		new OcrmainAsync(myimage, this, image_uri, DATA_PATH).execute();
 
-		baseApi.setDebug(true);
-		baseApi.init(DATA_PATH, lang,TessBaseAPI.OEM_CUBE_ONLY);
-		baseApi.setPageSegMode(TessBaseAPI.PSM_AUTO);
-		Log.v(TAG, "Before baseApi");
-		baseApi.setImage(myimage);
-		Log.v(TAG, "Before baseApi2");
-		String recognizedText = baseApi.getUTF8Text();
-		Log.v(TAG, "Before baseApi3");
-		baseApi.end();
-
-		Log.v(TAG, "OCRED TEXT: " + recognizedText);
-
-		if (lang.equalsIgnoreCase("eng")) {
-			recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
-		}
-
-		//recognizedText is the final OCRed text
-		recognizedText = recognizedText.trim();
-
-//		String ocrtext = "And...BAM! OCRed: " + recognizedText;
-//		Toast toast = Toast.makeText(this.getApplicationContext(), ocrtext,
-//				Toast.LENGTH_LONG);
-//		toast.show();
-		
-		//deleting temporary crop file created
-		File file = new File(
-				Environment
-						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
-		boolean deleted = file.delete();
-		Log.i(TAG, "File deleted: "+deleted);
-		
+//		Intent intent = new Intent(this, Contacts.class);
+//		startActivity(intent);
+	}
+	
+	public void doIntent(){
 		Intent intent = new Intent(this, ResultActivity.class);
 		intent.putExtra("ocrText", recognizedText);
 		startActivity(intent);
-		
-//		Intent intent = new Intent(this, Contacts.class);
-//		startActivity(intent);
 	}
 }

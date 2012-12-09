@@ -33,9 +33,12 @@ public class BitmapHandler {
 	public Bitmap decodeFileAsPath(String uri) {
 		// Create a file out of the uri
 		File f = null;
-
+		Log.v(TAG, "Incoming uri: " + uri);
 		f = new File(uri);
-
+		
+		if (f.equals(null)){
+			Log.v(TAG, "File is null!");
+		}
 		return decodeFile(f);
 	}
 
