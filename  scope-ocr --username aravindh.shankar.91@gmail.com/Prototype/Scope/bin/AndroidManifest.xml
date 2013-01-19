@@ -59,6 +59,11 @@
             android:name=".Ocrmain"
             android:label="@string/app_name" >
         </activity>
+        
+        <activity
+            android:name=".ResultActivity"
+            android:label="@string/app_name" >
+        </activity>
     
         <activity
             android:name=".Contacts"
