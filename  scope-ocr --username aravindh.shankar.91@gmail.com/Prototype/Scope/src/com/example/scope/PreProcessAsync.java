@@ -24,21 +24,22 @@ public class PreProcessAsync extends AsyncTask<Void, Void, String> {
 
 	@Override
 	protected String doInBackground(Void... params) {
-		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
-				uri);
-		process_uri_1 = smoother.BilateralFilter();
-
-		Threshold thresh = new Threshold(preprocess.getApplicationContext(),
-				process_uri_1);
-		double value = thresh.otsu();
-		Log.v(TAG, "otsu  " + value);
-		process_uri_2 = thresh.thresh_binary(value, 255);
-
-		Log.v(TAG, process_uri_2.toString());
-		preprocess.result_uri = process_uri_2;
-
-		
+//		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
+//				uri);
+//		process_uri_1 = smoother.BilateralFilter();
+//
+//		Threshold thresh = new Threshold(preprocess.getApplicationContext(),
+//				process_uri_1);
+//		double value = thresh.otsu();
+//		Log.v(TAG, "otsu  " + value);
+//		process_uri_2 = thresh.thresh_binary(value, 255);
+//
+//		Log.v(TAG, process_uri_2.toString());
+//		preprocess.result_uri = process_uri_2;
+//
+//		
 		Log.v(TAG,"finished background");
+		preprocess.result_uri = uri;
 		return null;
 	}
 	
@@ -49,7 +50,7 @@ public class PreProcessAsync extends AsyncTask<Void, Void, String> {
 		preprocess.runOnUiThread(new Runnable() {
 			public void run() {
 				// stuff that updates ui
-				preprocess.setImageURI(process_uri_2);
+				preprocess.setImageURI(uri);
 			}
 		});
 	}

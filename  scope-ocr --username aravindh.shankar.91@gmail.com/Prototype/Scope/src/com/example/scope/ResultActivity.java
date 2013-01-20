@@ -1,5 +1,8 @@
 package com.example.scope;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Bundle;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -9,12 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v4.app.NavUtils;
 
 public class ResultActivity extends Activity {
-	String ocrText;
-	TextView result;
+	List<SegmentationResult> ocrResults;
 	Button home;
 	final Context a=this;
     @Override
@@ -27,11 +30,18 @@ public class ResultActivity extends Activity {
 		ab.setDisplayShowTitleEnabled(false);
         setContentView(R.layout.activity_result);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
-        ocrText = getIntent().getStringExtra("ocrText");
+        //ocrText = getIntent().getStringExtra("ocrText");
         
-        result = (TextView) findViewById(R.id.resultLabel);
+        Globals appState = ((Globals) getApplicationContext());
+		ocrResults = appState.getSegmentationResult();
+		
+		
+        //result = (TextView) findViewById(R.id.resultLabel);
+		final ListView lv = (ListView) findViewById(R.id.srListView);
+		lv.setAdapter(new ResultsAdapter(this, ocrResults));
+		
         home = (Button) findViewById(R.id.button1);
-        result.setText(ocrText);
+        //result.setText(ocrText);
         
         home.setOnClickListener(new ButtonClickHandler());
         
