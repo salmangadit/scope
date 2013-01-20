@@ -4,15 +4,10 @@
     android:layout_height="match_parent"
     android:background="@color/black" >
 
-    <TextView
-        android:id="@+id/resultLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text=""
-        android:textColor="@color/white"
-        tools:context=".ResultActivity" />
+    <ListView
+        android:id="@+id/srListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
 
     <Button
         android:id="@+id/button1"

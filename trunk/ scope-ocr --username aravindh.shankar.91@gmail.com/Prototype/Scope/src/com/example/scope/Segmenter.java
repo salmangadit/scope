@@ -38,6 +38,8 @@ public class Segmenter {
 	int max = 255;
 	static int BIN_NUMBER = 16;
 
+	List<String> coordinates = null;
+
 	private static final String TAG = "Scope.java";
 
 	// Constructor
@@ -45,6 +47,7 @@ public class Segmenter {
 		currContext = c;
 		inputImageUri = inputUri;
 		rand = new Random();
+		coordinates = new ArrayList<String>();
 	}
 
 	// Method to set image only, if class has already been instantiated
@@ -145,9 +148,9 @@ public class Segmenter {
 				Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),
 						(rand.nextInt(max - min + 1) + min), (rand.nextInt(max
 								- min + 1) + min));
-				Core.rectangle(sourceImageMat,
-						boundingRectangles.get(maxAreaIdx).tl(),
-						boundingRectangles.get(maxAreaIdx).br(), color, 2, 8, 0);
+				// Core.rectangle(sourceImageMat,
+				// boundingRectangles.get(maxAreaIdx).tl(),
+				// boundingRectangles.get(maxAreaIdx).br(), color, 2, 8, 0);
 
 				backgrounds.add(boundingRectangles.get(maxAreaIdx));
 
@@ -157,6 +160,10 @@ public class Segmenter {
 						boundingRectangles.get(maxAreaIdx).width,
 						boundingRectangles.get(maxAreaIdx).height,
 						sourceImageMat);
+
+				coordinates.add(boundingRectangles.get(maxAreaIdx).x + ":"
+						+ boundingRectangles.get(maxAreaIdx).y);
+
 				destImage = Bitmap.createBitmap(
 						boundingRectangles.get(maxAreaIdx).width,
 						boundingRectangles.get(maxAreaIdx).height,
@@ -187,8 +194,13 @@ public class Segmenter {
 		return segmentedResults;
 	}
 	
+	public List<String> getCoordinates(){
+		return coordinates;
+	}
+
 	/*
-	 * This method segments the different parts of the card into its text components
+	 * This method segments the different parts of the card into its text
+	 * components
 	 */
 	public List<Uri> SegmentText(Integer backgroundSegmentationId) {
 		Mat sourceImageMat = new Mat();
@@ -239,13 +251,15 @@ public class Segmenter {
 
 		// Check tolerance area for large rectangles
 		int sourceImageArea = sourceImageMat.width() * sourceImageMat.height();
-		double sourceAreaTolerance = sourceImageArea * 0.9;
+		double sourceAreaToleranceMax = sourceImageArea * 0.9;
+		double sourceAreaToleranceMin = sourceImageArea * 0.05;
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
 
 			// Remove contours that could be mistaken edges
-			if (currentRectangle.area() < sourceAreaTolerance) {
+			if (currentRectangle.area() < sourceAreaToleranceMax
+					&& currentRectangle.area() > sourceAreaToleranceMin) {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
@@ -283,14 +297,17 @@ public class Segmenter {
 							- min + 1) + min));
 			// Imgproc.drawContours(destImageMat, contours, i, color, 1, 8,
 			// heirarchy, 0, new Point());
-			Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
-					boundingRectangles.get(i).br(), color, 2, 8, 0);
+			//Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
+			//		boundingRectangles.get(i).br(), color, 2, 8, 0);
 
 			// Create region of interest and save as a seperate file
 			Mat cropped = performCrop(boundingRectangles.get(i).x,
 					boundingRectangles.get(i).y,
 					boundingRectangles.get(i).width,
 					boundingRectangles.get(i).height, sourceImageMat);
+			
+			coordinates.add(boundingRectangles.get(i).x + ":"
+					+ boundingRectangles.get(i).y);
 
 			destImage = Bitmap.createBitmap(boundingRectangles.get(i).width,
 					boundingRectangles.get(i).height, Bitmap.Config.ARGB_8888);
@@ -302,7 +319,8 @@ public class Segmenter {
 			File file = new File(
 					Environment
 							.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-					"bg-seg"+backgroundSegmentationId+"-text-seg" + i + ".bmp");
+					"bg-seg" + backgroundSegmentationId + "-text-seg" + i
+							+ ".bmp");
 
 			try {
 				FileOutputStream out = new FileOutputStream(file);
