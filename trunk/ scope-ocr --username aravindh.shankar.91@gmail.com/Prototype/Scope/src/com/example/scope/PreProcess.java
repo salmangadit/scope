@@ -1,9 +1,6 @@
 package com.example.scope;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.List;
 
 import org.opencv.android.OpenCVLoader;
 
@@ -14,8 +11,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -54,44 +49,28 @@ public class PreProcess extends Activity {
 		String b = getIntent().getStringExtra("image_uri");
 		image_uri = Uri.parse(b);
 		Log.v(TAG, image_uri.toString());
-//		Bitmap sourceImage = null;
-		
-//		BitmapHandler bitmaphandler = new BitmapHandler(this.getApplicationContext());
-//		myimage = bitmaphandler.decodeFileAsPath(filepath);
-		
-//		try {
-//			sourceImage = MediaStore.Images.Media.getBitmap(
-//					getContentResolver(), image_uri);
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			Log.v(TAG, "NULL");
-//			e.printStackTrace();
-//		}
-//
-//		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
-//		
-//		
-//		File file = new File(
-//				Environment
-//						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-//				"temp.bmp");
-//
-//		try {
-//			FileOutputStream out = new FileOutputStream(file);
-//			sourceImage.compress(Bitmap.CompressFormat.PNG, 90, out);
-//		} catch (Exception e) {
-//			Log.v(TAG, "null2");
-//			e.printStackTrace();
-//		}
 
+		///////////////Pre process starts
+		Greyscale grey = new Greyscale(this.getApplicationContext(), image_uri);
+		Uri ppimage=grey.greyscale();
+		
+		Smoothing smoother = new Smoothing(this.getApplicationContext(),
+				ppimage);
+		Uri ppimage1 = smoother.BilateralFilter();
+				 
+		Adpt initadpt = new Adpt(this.getApplicationContext(),ppimage1);
+		Uri ppimage2 = initadpt.thresh();
+	
+		SegmentLine segmenter = new SegmentLine(this.getApplicationContext(),ppimage2, ppimage1);
+		List<Uri> segmentedResults = segmenter.segLine();
+		
+		Analyse analyser=new Analyse(this.getApplicationContext(),segmentedResults);
+		segmentedResults = analyser.adaptiveSplitter();	
+		////////////////Pre process ends : segmentedResults is a list of URIs of processed segments
+		
 		final Uri uri;
 		uri = image_uri;
-		//uri = Uri.fromFile(file);
 	
-//		Morphing morphing = new Morphing(this.getApplicationContext(),uri);
-//		process_uri_1 = morphing.erode(-20);
-		//ImageView imageView = (ImageView) findViewById(R.id.imgView);
 		new PreProcessAsync(uri, this).execute();
 
 		Button button_done = (Button) findViewById(R.id.button1);
