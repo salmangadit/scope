@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ResultsAdapter extends BaseAdapter {
@@ -46,6 +47,9 @@ public class ResultsAdapter extends BaseAdapter {
 					.findViewById(R.id.coordinates);
 			holder.txtConfidence = (TextView) convertView
 					.findViewById(R.id.confidence);
+			
+			holder.imgImage = (ImageView) convertView
+					.findViewById(R.id.image);
 
 			convertView.setTag(holder);
 		} else {
@@ -56,7 +60,8 @@ public class ResultsAdapter extends BaseAdapter {
 		holder.txtCordinates.setText("Co-ords: "+ ocrResults.get(position).X + ","
 				+ ocrResults.get(position).Y);
 		holder.txtConfidence.setText("Confidence: " + ocrResults.get(position).Confidence);
-
+		holder.imgImage.setImageURI(ocrResults.get(position).image);
+		
 		return convertView;
 	}
 
@@ -64,5 +69,6 @@ public class ResultsAdapter extends BaseAdapter {
 		TextView txtResult;
 		TextView txtCordinates;
 		TextView txtConfidence;
+		ImageView imgImage;
 	}
 }

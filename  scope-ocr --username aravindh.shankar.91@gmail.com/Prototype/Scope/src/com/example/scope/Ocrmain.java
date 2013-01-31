@@ -40,6 +40,8 @@ public class Ocrmain extends Activity {
 	List<Uri> allText;
 	List<String> allCoords;
 
+	List<Uri> adaptiveResults;
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "enter...");
@@ -47,11 +49,14 @@ public class Ocrmain extends Activity {
 
 		ocrResults = new ArrayList<SegmentationResult>();
 
+		Globals appState = ((Globals) getApplicationContext());
+		adaptiveResults = appState.getAdaptiveResult();
+
 		// Intent input
 		filepath = getIntent().getStringExtra("file_path");
-		String b = getIntent().getStringExtra("image_uri");
-		image_uri = Uri.parse(b);
-		Log.v(TAG, image_uri.toString());
+		//String b = getIntent().getStringExtra("image_uri");
+		//image_uri = Uri.parse(b);
+		//Log.v(TAG, image_uri.toString());
 		checkResultCount = 0;
 		ocr_main();
 	}
@@ -61,15 +66,15 @@ public class Ocrmain extends Activity {
 		// Applying segmentation here temporarily until a proper way to transfer
 		// lists across intents can be found
 
-		Segmenter segmenter = new Segmenter(this.getApplicationContext(),
-				image_uri);
-		List<Uri> ppimage = segmenter.SegmentBackground();
+		// Segmenter segmenter = new Segmenter(this.getApplicationContext(),
+		// image_uri);
+		// List<Uri> ppimage = segmenter.SegmentBackground();
 		allText = new ArrayList<Uri>();
 		allCoords = new ArrayList<String>();
 
-		for (int i = 0; i < ppimage.size(); i++) {
+		for (int i = 0; i < adaptiveResults.size(); i++) {
 			Segmenter textSegmenter = new Segmenter(
-					this.getApplicationContext(), ppimage.get(i));
+					this.getApplicationContext(), adaptiveResults.get(i));
 			List<Uri> textSegs = textSegmenter.SegmentText(i);
 			List<String> coordinates = textSegmenter.getCoordinates();
 
@@ -77,7 +82,6 @@ public class Ocrmain extends Activity {
 				allText.add(textSegs.get(j));
 				allCoords.add(coordinates.get(j));
 			}
-
 		}
 
 		Log.v(TAG, "Total segments: " + allText.size());
@@ -86,6 +90,7 @@ public class Ocrmain extends Activity {
 			SegmentationResult result = new SegmentationResult();
 			result.X = getCoordsX(allCoords.get(i));
 			result.Y = getCoordsY(allCoords.get(i));
+			result.image = allText.get(i);
 			new OcrmainAsync(myimage, this, allText.get(i), DATA_PATH, result)
 					.execute();
 		}

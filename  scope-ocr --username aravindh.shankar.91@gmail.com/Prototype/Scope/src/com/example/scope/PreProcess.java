@@ -66,12 +66,15 @@ public class PreProcess extends Activity {
 		
 		Analyse analyser=new Analyse(this.getApplicationContext(),segmentedResults);
 		segmentedResults = analyser.adaptiveSplitter();	
+		
+		Globals appState = ((Globals) getApplicationContext());
+		appState.setAdaptiveResult(segmentedResults);
 		////////////////Pre process ends : segmentedResults is a list of URIs of processed segments
 		
 		final Uri uri;
 		uri = image_uri;
 	
-		new PreProcessAsync(uri, this).execute();
+		//new PreProcessAsync(uri, this).execute();
 
 		Button button_done = (Button) findViewById(R.id.button1);
 
@@ -84,7 +87,7 @@ public class PreProcess extends Activity {
 				Log.v(TAG, "Done button clicked");
 				Intent i = new Intent(a, Ocrmain.class);
 				i.putExtra("file_path", filepath);
-				i.putExtra("image_uri", result_uri.toString());
+				//i.putExtra("image_uri", result_uri.toString());
 				startActivity(i);
 
 			}

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import com.googlecode.tesseract.android.ResultIterator;
 import com.googlecode.tesseract.android.TessBaseAPI;
+import com.googlecode.tesseract.android.TessBaseAPI.PageIteratorLevel;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
@@ -75,13 +77,12 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 
 		baseApi.setDebug(true);
 		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
-		baseApi.setPageSegMode(TessBaseAPI.PSM_AUTO);
+		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
 		Log.v(TAG, "Before baseApi");
 		baseApi.setImage(myimage);
 		Log.v(TAG, "Before baseApi2");
 		String recognizedText = baseApi.getUTF8Text();
 		Log.v(TAG, "Before baseApi3");
-		baseApi.end();
 
 		Log.v(TAG, "OCRED TEXT: " + recognizedText);
 
@@ -101,11 +102,29 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 
 		result.Result = recognizedText;
 		result.Confidence = baseApi.meanConfidence();
+		 // Iterate through the results.
+//        final ResultIterator iterator = baseApi.getResultIterator();
+//        String lastUTF8Text;
+//        float lastConfidence;
+//        int count = 0;
+//        iterator.begin();
+//        do {
+//            lastUTF8Text = iterator.getUTF8Text(PageIteratorLevel.RIL_WORD);
+//            lastConfidence = iterator.confidence(PageIteratorLevel.RIL_WORD);
+//            count++;
+//        } while (iterator.next(PageIteratorLevel.RIL_WORD));
+//
+//        System.out.println("Found " + count + " result.");
+//        System.out.println("lastUTF8Text '" + lastUTF8Text + "' should match outputText '" + recognizedText + "'.");
+//        System.out.println("Confidence: " + lastConfidence);
+        
+        //result.Confidence = (int)lastConfidence;
+        
 		Log.v(TAG, "Confidence:"+ Arrays.toString(baseApi.wordConfidences()));
 		ocrmain.ocrResults.add(result);
 
 		// ocrmain.recognizedText = recognizedText;
-
+		baseApi.end();
 		Log.i(TAG, "File deleted: " + deleted);
 		return null;
 	}
