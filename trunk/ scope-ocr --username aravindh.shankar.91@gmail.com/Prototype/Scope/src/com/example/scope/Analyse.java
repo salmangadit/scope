@@ -22,7 +22,7 @@ public class Analyse {
 	private static final String TAG = "Scope.java";
 	Uri inputImageUri;
 	Context currContext;
-	private int BINS = 16;
+	private int BINS = 32;
 	List<Uri> segmentedResults;
 	
 	public Analyse(Context c, Uri inputUri) {
@@ -75,9 +75,9 @@ public class Analyse {
 		Log.v(TAG, "Histogram: " + histogram.dump()); 
 		
 		double low = 0,high = 0;
-		for(int i=0;i<16;i++)
+		for(int i=0;i<32;i++)
 		{
-			if(i<13)
+			if(i<28)
 				low+=histogram.get(i,0)[0];
 			else
 				high+=histogram.get(i,0)[0];
