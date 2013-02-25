@@ -173,7 +173,7 @@ public class Smoothing {
 		File file = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
+				"temp2.bmp");
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);

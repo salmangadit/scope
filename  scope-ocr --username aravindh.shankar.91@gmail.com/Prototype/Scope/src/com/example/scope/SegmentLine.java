@@ -128,12 +128,13 @@ public class SegmentLine {
 		// Check tolerance area for large rectangles
 		int sourceImageArea = sourceImageMat.width() * sourceImageMat.height();
 		double sourceAreaTolerance = sourceImageArea * 0.9;
+		double sourceAreaMinTolerance = sourceImageArea * 0.05;
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
 
 			// Remove contours that could be mistaken edges
-			if (currentRectangle.area() < sourceAreaTolerance) {
+			if (currentRectangle.area() < sourceAreaTolerance && currentRectangle.area()>sourceAreaMinTolerance) {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
@@ -203,6 +204,11 @@ public class SegmentLine {
 			Log.v(TAG, uri.toString());
 			segmentedResults.add(uri);
 		}
+		
+		if (segmentedResults.size() == 0){
+			segmentedResults.add(inputImageUri);
+		}
+		
 		return segmentedResults;
 
 	}
