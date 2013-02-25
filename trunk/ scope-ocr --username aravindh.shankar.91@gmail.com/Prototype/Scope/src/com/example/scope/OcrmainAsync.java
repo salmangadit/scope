@@ -77,7 +77,7 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 
 		baseApi.setDebug(true);
 		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
-		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
+		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
 		Log.v(TAG, "Before baseApi");
 		baseApi.setImage(myimage);
 		Log.v(TAG, "Before baseApi2");
@@ -86,9 +86,9 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 
 		Log.v(TAG, "OCRED TEXT: " + recognizedText);
 
-		if (lang.equalsIgnoreCase("eng")) {
-			recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
-		}
+		//if (lang.equalsIgnoreCase("eng")) {
+		//	recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
+		//}
 
 		// recognizedText is the final OCRed text
 		recognizedText = recognizedText.trim();

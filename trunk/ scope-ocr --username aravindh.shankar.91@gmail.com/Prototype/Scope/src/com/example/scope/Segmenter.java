@@ -193,8 +193,8 @@ public class Segmenter {
 
 		return segmentedResults;
 	}
-	
-	public List<String> getCoordinates(){
+
+	public List<String> getCoordinates() {
 		return coordinates;
 	}
 
@@ -231,13 +231,15 @@ public class Segmenter {
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
 		Imgproc.cvtColor(sourceImageMat, destImageMat_temp,
 				Imgproc.COLOR_BGR2GRAY, 0);
-		Imgproc.medianBlur(destImageMat_temp, destImageMat, 7);
-		Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 11, 2);
+		// Imgproc.medianBlur(destImageMat_temp, destImageMat, 7);
+		// Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 11,
+		// 2);
 
-		Imgproc.dilate(destImageMat, destImageMat_temp, new Mat(), new Point(),
-				7);
+		// Imgproc.dilate(destImageMat, destImageMat_temp, new Mat(), new
+		// Point(),
+		// 7);
 		Imgproc.erode(destImageMat_temp, destImageMat, new Mat(), new Point(),
-				2);
+				5);
 
 		Imgproc.threshold(destImageMat, destImageMat, 160, 160,
 				Imgproc.THRESH_BINARY);
@@ -297,15 +299,15 @@ public class Segmenter {
 							- min + 1) + min));
 			// Imgproc.drawContours(destImageMat, contours, i, color, 1, 8,
 			// heirarchy, 0, new Point());
-			//Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
-			//		boundingRectangles.get(i).br(), color, 2, 8, 0);
+			// Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
+			// boundingRectangles.get(i).br(), color, 2, 8, 0);
 
 			// Create region of interest and save as a seperate file
 			Mat cropped = performCrop(boundingRectangles.get(i).x,
 					boundingRectangles.get(i).y,
 					boundingRectangles.get(i).width,
 					boundingRectangles.get(i).height, sourceImageMat);
-			
+
 			coordinates.add(boundingRectangles.get(i).x + ":"
 					+ boundingRectangles.get(i).y);
 
@@ -333,6 +335,12 @@ public class Segmenter {
 			final Uri uri = Uri.fromFile(file);
 			Log.v(TAG, uri.toString());
 			segmentedResults.add(uri);
+		}
+
+		if (segmentedResults.size() == 0) {
+			Log.v(TAG, "No Segments Found. Returning original");
+			segmentedResults.add(inputImageUri);
+			coordinates.add("99:99");
 		}
 
 		return segmentedResults;

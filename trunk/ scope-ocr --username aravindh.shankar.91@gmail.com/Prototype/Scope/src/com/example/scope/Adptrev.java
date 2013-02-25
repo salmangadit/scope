@@ -89,7 +89,12 @@ public class Adptrev {
 				   destImageMat.put(i, j,(int)(MID+diff));
 			}
 		
-		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 5, 5);
+		Utils.matToBitmap(destImageMat, destImage);
+		String temp = file_name;
+		file_name = "tempor.bmp";
+		store();
+		file_name = temp;
+		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 7, 5);
 	
 		Utils.matToBitmap(final_dest_mat, destImage);
 

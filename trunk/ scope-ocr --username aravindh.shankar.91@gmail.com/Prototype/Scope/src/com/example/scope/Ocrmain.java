@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -92,7 +94,7 @@ public class Ocrmain extends Activity {
 			result.Y = getCoordsY(allCoords.get(i));
 			result.image = allText.get(i);
 			new OcrmainAsync(myimage, this, allText.get(i), DATA_PATH, result)
-					.execute();
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 		// Intent intent = new Intent(this, Contacts.class);
 		// startActivity(intent);
