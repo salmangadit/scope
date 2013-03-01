@@ -5,8 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -43,6 +48,8 @@ public class Ocrmain extends Activity {
 	List<String> allCoords;
 
 	List<Uri> adaptiveResults;
+	
+	Date before, after;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,9 +63,9 @@ public class Ocrmain extends Activity {
 
 		// Intent input
 		filepath = getIntent().getStringExtra("file_path");
-		//String b = getIntent().getStringExtra("image_uri");
-		//image_uri = Uri.parse(b);
-		//Log.v(TAG, image_uri.toString());
+		// String b = getIntent().getStringExtra("image_uri");
+		// image_uri = Uri.parse(b);
+		// Log.v(TAG, image_uri.toString());
 		checkResultCount = 0;
 		ocr_main();
 	}
@@ -87,14 +94,28 @@ public class Ocrmain extends Activity {
 		}
 
 		Log.v(TAG, "Total segments: " + allText.size());
+		before = new Date();
+		
+		int limit = 50;
+		BlockingQueue<Runnable> q = new ArrayBlockingQueue<Runnable>(limit);
+		ThreadPoolExecutor executor = 
+                new ThreadPoolExecutor(limit, limit, 60, TimeUnit.SECONDS, q);
 
 		for (int i = 0; i < allText.size(); i++) {
 			SegmentationResult result = new SegmentationResult();
 			result.X = getCoordsX(allCoords.get(i));
 			result.Y = getCoordsY(allCoords.get(i));
 			result.image = allText.get(i);
-			new OcrmainAsync(myimage, this, allText.get(i), DATA_PATH, result)
-					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+			TessBaseAPI baseApi = new TessBaseAPI();
+
+			baseApi.setDebug(true);
+			baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
+			baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
+			Log.v(TAG, "Before baseApi");
+			
+			
+			new OcrmainAsync(this, allText.get(i), DATA_PATH, result, baseApi)
+					.executeOnExecutor(executor);
 		}
 		// Intent intent = new Intent(this, Contacts.class);
 		// startActivity(intent);
@@ -117,7 +138,10 @@ public class Ocrmain extends Activity {
 		}
 	}
 
-	public void doIntent() {
+	public void doIntent(){
+		after = new Date();
+		long diff = after.getTime() - before.getTime();
+		Log.v(TAG, "Time taken: " + Long.toString(diff));
 		Intent intent = new Intent(this, ResultActivity.class);
 		Globals appState = ((Globals) getApplicationContext());
 		appState.setSegmentationResult(ocrResults);

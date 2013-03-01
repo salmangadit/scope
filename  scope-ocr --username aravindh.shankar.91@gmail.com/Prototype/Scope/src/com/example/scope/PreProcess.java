@@ -58,8 +58,10 @@ public class PreProcess extends Activity {
 				ppimage);
 		Uri ppimage1 = smoother.BilateralFilter();
 				 
-		Adpt initadpt = new Adpt(this.getApplicationContext(),ppimage1,"temp1.bmp");
+		Adpt initadpt = new Adpt(this.getApplicationContext(),ppimage1,"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
+		
+		
 	
 		SegmentLine segmenter = new SegmentLine(this.getApplicationContext(),ppimage2, ppimage1);
 		List<Uri> segmentedResults = segmenter.segLine();
