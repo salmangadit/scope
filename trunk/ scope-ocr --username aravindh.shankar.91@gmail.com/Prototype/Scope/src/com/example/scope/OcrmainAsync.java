@@ -22,21 +22,22 @@ import android.util.Log;
 public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 	Ocrmain ocrmain;
 	ProgressDialog progressDialog;
-	public Bitmap myimage;
+	Bitmap myimage;
 	public Uri image_uri;
 	String DATA_PATH;
 	SegmentationResult result;
+	TessBaseAPI baseApi;
 
 	static final String lang = "eng";
 	static final String TAG = "Scope.java";
 
-	public OcrmainAsync(Bitmap myimage, Ocrmain main, Uri image_uri,
-			String data, SegmentationResult result) {
-		this.myimage = myimage;
+	public OcrmainAsync(Ocrmain main, Uri image_uri,
+			String data, SegmentationResult result, TessBaseAPI baseApi) {
 		this.ocrmain = main;
 		this.image_uri = image_uri;
 		this.DATA_PATH = data;
 		this.result = result;
+		this.baseApi = baseApi;
 	}
 
 	protected void onPreExecute() {
@@ -73,59 +74,27 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 		Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
 
 		// TessBase starts
-		TessBaseAPI baseApi = new TessBaseAPI();
-
-		baseApi.setDebug(true);
-		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
-		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
-		Log.v(TAG, "Before baseApi");
+//		TessBaseAPI baseApi = new TessBaseAPI();
+//
+//		baseApi.setDebug(true);
+//		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
+//		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
+//		Log.v(TAG, "Before baseApi");
 		baseApi.setImage(myimage);
 		Log.v(TAG, "Before baseApi2");
 		String recognizedText = baseApi.getUTF8Text();
 		Log.v(TAG, "Before baseApi3");
 
 		Log.v(TAG, "OCRED TEXT: " + recognizedText);
-
-		//if (lang.equalsIgnoreCase("eng")) {
-		//	recognizedText = recognizedText.replaceAll("[^a-zA-Z0-9]+", " ");
-		//}
-
-		// recognizedText is the final OCRed text
 		recognizedText = recognizedText.trim();
-
-		// deleting temporary crop file created
-		File file = new File(
-				Environment
-						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
-		boolean deleted = file.delete();
-
 		result.Result = recognizedText;
 		result.Confidence = baseApi.meanConfidence();
-		 // Iterate through the results.
-//        final ResultIterator iterator = baseApi.getResultIterator();
-//        String lastUTF8Text;
-//        float lastConfidence;
-//        int count = 0;
-//        iterator.begin();
-//        do {
-//            lastUTF8Text = iterator.getUTF8Text(PageIteratorLevel.RIL_WORD);
-//            lastConfidence = iterator.confidence(PageIteratorLevel.RIL_WORD);
-//            count++;
-//        } while (iterator.next(PageIteratorLevel.RIL_WORD));
-//
-//        System.out.println("Found " + count + " result.");
-//        System.out.println("lastUTF8Text '" + lastUTF8Text + "' should match outputText '" + recognizedText + "'.");
-//        System.out.println("Confidence: " + lastConfidence);
-        
-        //result.Confidence = (int)lastConfidence;
-        
+
 		Log.v(TAG, "Confidence:"+ Arrays.toString(baseApi.wordConfidences()));
 		ocrmain.ocrResults.add(result);
 
-		// ocrmain.recognizedText = recognizedText;
 		baseApi.end();
-		Log.i(TAG, "File deleted: " + deleted);
+		//Log.i(TAG, "File deleted: " + deleted);
 		return null;
 	}
 

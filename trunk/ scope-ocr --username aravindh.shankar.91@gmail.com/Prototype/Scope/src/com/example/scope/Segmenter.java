@@ -229,42 +229,45 @@ public class Segmenter {
 		destImageMat_temp = Mat.zeros(sourceImageMat.size(),
 				sourceImageMat.type());
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
-		Imgproc.cvtColor(sourceImageMat, destImageMat_temp,
-				Imgproc.COLOR_BGR2GRAY, 0);
-		// Imgproc.medianBlur(destImageMat_temp, destImageMat, 7);
-		// Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 11,
-		// 2);
+		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_BGR2GRAY,
+				0);
+		Imgproc.medianBlur(destImageMat, destImageMat, 3);
+		Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 15, 2);
 
-		// Imgproc.dilate(destImageMat, destImageMat_temp, new Mat(), new
-		// Point(),
-		// 7);
-		Imgproc.erode(destImageMat_temp, destImageMat, new Mat(), new Point(),
-				5);
+		Imgproc.dilate(destImageMat, destImageMat, new Mat(), new Point(), 4);
+		Imgproc.erode(destImageMat, destImageMat, new Mat(), new Point(), 1);
 
-		Imgproc.threshold(destImageMat, destImageMat, 160, 160,
-				Imgproc.THRESH_BINARY);
+		// Imgproc.threshold(destImageMat, destImageMat, 160, 160,
+		// Imgproc.THRESH_BINARY_INV);
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
 		Mat heirarchy = new Mat();
-		Imgproc.findContours(destImageMat, contours, heirarchy,
+
+		destImageMat_temp = destImageMat.clone();
+		Imgproc.findContours(destImageMat_temp, contours, heirarchy,
 				Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0, 0));
 
 		List<Rect> boundingRectangles_temp = new ArrayList<Rect>();
 
 		// Check tolerance area for large rectangles
 		int sourceImageArea = sourceImageMat.width() * sourceImageMat.height();
-		double sourceAreaToleranceMax = sourceImageArea * 0.9;
-		double sourceAreaToleranceMin = sourceImageArea * 0.05;
+
+		Log.v(TAG, "Total image area: " + sourceImageArea);
+		double sourceAreaTolerance = sourceImageArea * 0.85;
+		double toleranceMin = sourceImageArea * 0.01;
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
 
 			// Remove contours that could be mistaken edges
-			if (currentRectangle.area() < sourceAreaToleranceMax
-					&& currentRectangle.area() > sourceAreaToleranceMin) {
+			if (currentRectangle.area() < sourceAreaTolerance
+					&& currentRectangle.area() > toleranceMin) {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
+
+		Log.v(TAG,
+				"Total text regions found: " + boundingRectangles_temp.size());
 
 		// Remove all rectangles inside any outer rectangles
 		List<Integer> toRemove = new ArrayList<Integer>();
@@ -291,9 +294,156 @@ public class Segmenter {
 
 			boundingRectangles.add(boundingRectangles_temp.get(i));
 		}
+		
+		Log.v(TAG, "After removing inner rects: " + boundingRectangles.size());
 
-		Mat drawing = Mat.zeros(destImageMat.size(), CvType.CV_8UC3);
+		int MIN_DIST_CORNERS = 20;
+		List<List<Rect>> clusters = new ArrayList<List<Rect>>(
+				boundingRectangles.size());
+
+		// Rectangle clustering algorithm
 		for (int i = 0; i < boundingRectangles.size(); i++) {
+			Point topLeft = new Point(boundingRectangles.get(i).x,
+					boundingRectangles.get(i).y);
+			Point topRight = new Point(boundingRectangles.get(i).x
+					+ boundingRectangles.get(i).width,
+					boundingRectangles.get(i).y);
+			Point bottomLeft = new Point(boundingRectangles.get(i).x,
+					boundingRectangles.get(i).y
+							+ boundingRectangles.get(i).height);
+			Point bottomRight = new Point(boundingRectangles.get(i).x
+					+ boundingRectangles.get(i).width,
+					boundingRectangles.get(i).y
+							+ boundingRectangles.get(i).height);
+
+			List<Point> first = new ArrayList<Point>();
+			first.add(topLeft);
+			first.add(topRight);
+			first.add(bottomLeft);
+			first.add(bottomRight);
+
+			List<Rect> toCluster = new ArrayList<Rect>();
+
+			for (int j = 0; j < boundingRectangles.size(); j++) {
+				if (boundingRectangles.get(j).equals(boundingRectangles.get(i))) {
+					continue;
+				}
+				Point topLeftSecond = new Point(boundingRectangles.get(j).x,
+						boundingRectangles.get(j).y);
+				Point topRightSecond = new Point(boundingRectangles.get(j).x
+						+ boundingRectangles.get(j).width,
+						boundingRectangles.get(j).y);
+				Point bottomLeftSecond = new Point(boundingRectangles.get(j).x,
+						boundingRectangles.get(j).y
+								+ boundingRectangles.get(j).height);
+				Point bottomRightSecond = new Point(boundingRectangles.get(j).x
+						+ boundingRectangles.get(j).width,
+						boundingRectangles.get(j).y
+								+ boundingRectangles.get(j).height);
+
+				List<Point> second = new ArrayList<Point>();
+				second.add(topLeftSecond);
+				second.add(topRightSecond);
+				second.add(bottomLeftSecond);
+				second.add(bottomRightSecond);
+
+				boolean doneCluster = false;
+				for (int m = 0; m < first.size(); m++) {
+					for (int n = 0; n < second.size(); n++) {
+						double distance = distance(first.get(m), second.get(n));
+
+						if (distance < MIN_DIST_CORNERS) {
+							if (!toCluster.contains(boundingRectangles.get(i))) {
+								toCluster.add(boundingRectangles.get(i));
+							}
+
+							if (!toCluster.contains(boundingRectangles.get(j))) {
+								toCluster.add(boundingRectangles.get(j));
+							}
+
+							doneCluster = true;
+							break;
+						}
+					}
+
+					if (doneCluster)
+						break;
+					else if (!toCluster.contains(boundingRectangles.get(i))) {
+						toCluster.add(boundingRectangles.get(i));
+					}
+
+				}
+			}
+
+			boolean addToCluster = false;
+			int clusterIndexToAdd = 0;
+
+			// analyse clusters
+			for (int x = 0; x < clusters.size(); x++) {
+				for (int y = 0; y < clusters.get(x).size(); y++) {
+					for (int z = 0; z < toCluster.size(); z++) {
+						if (toCluster.get(z).equals(clusters.get(x).get(y))) {
+							addToCluster = true;
+							clusterIndexToAdd = x;
+						}
+					}
+				}
+			}
+
+			// if can be added to an existing cluster
+			if (addToCluster) {
+				for (int z = 0; z < toCluster.size(); z++) {
+					if (!clusters.get(clusterIndexToAdd).contains(
+							toCluster.get(z))) {
+						clusters.get(clusterIndexToAdd).add(toCluster.get(z));
+					}
+				}
+			} else {
+				// create new cluster
+				if (toCluster.size() > 0)
+					clusters.add(toCluster);
+
+			}
+		}
+
+		// Apply result of clustering
+		List<Rect> boundingClusteredRects = new ArrayList<Rect>();
+
+		for (int i = 0; i < clusters.size(); i++) {
+			double minX = sourceImageMat.width();
+			double minY = sourceImageMat.height();
+			double maxX = 0;
+			double maxY = 0;
+
+			for (int j = 0; j < clusters.get(i).size(); j++) {
+				if (clusters.get(i).get(j).x < minX) {
+					minX = clusters.get(i).get(j).x;
+				}
+
+				if (clusters.get(i).get(j).x + clusters.get(i).get(j).width > maxX) {
+					maxX = clusters.get(i).get(j).x
+							+ clusters.get(i).get(j).width;
+				}
+
+				if (clusters.get(i).get(j).y < minY) {
+					minY = clusters.get(i).get(j).y;
+				}
+
+				if (clusters.get(i).get(j).y + clusters.get(i).get(j).height > maxY) {
+					maxY = clusters.get(i).get(j).y
+							+ clusters.get(i).get(j).height;
+				}
+			}
+
+			Rect clustered = new Rect((int) minX, (int) minY,
+					(int) (maxX - minX), (int) (maxY - minY));
+			boundingClusteredRects.add(clustered);
+		}
+		
+		Log.v(TAG, "After clustering: " + boundingClusteredRects.size());
+
+		//Mat drawing = Mat.zeros(destImageMat.size(), CvType.CV_8UC3);
+		for (int i = 0; i < boundingClusteredRects.size(); i++) {
 			Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),
 					(rand.nextInt(max - min + 1) + min), (rand.nextInt(max
 							- min + 1) + min));
@@ -303,16 +453,16 @@ public class Segmenter {
 			// boundingRectangles.get(i).br(), color, 2, 8, 0);
 
 			// Create region of interest and save as a seperate file
-			Mat cropped = performCrop(boundingRectangles.get(i).x,
-					boundingRectangles.get(i).y,
-					boundingRectangles.get(i).width,
-					boundingRectangles.get(i).height, sourceImageMat);
+			Mat cropped = performCrop(boundingClusteredRects.get(i).x,
+					boundingClusteredRects.get(i).y,
+					boundingClusteredRects.get(i).width,
+					boundingClusteredRects.get(i).height, sourceImageMat);
 
-			coordinates.add(boundingRectangles.get(i).x + ":"
-					+ boundingRectangles.get(i).y);
+			coordinates.add(boundingClusteredRects.get(i).x + ":"
+					+ boundingClusteredRects.get(i).y);
 
-			destImage = Bitmap.createBitmap(boundingRectangles.get(i).width,
-					boundingRectangles.get(i).height, Bitmap.Config.ARGB_8888);
+			destImage = Bitmap.createBitmap(boundingClusteredRects.get(i).width,
+					boundingClusteredRects.get(i).height, Bitmap.Config.ARGB_8888);
 
 			Utils.matToBitmap(cropped.clone(), destImage);
 
@@ -344,6 +494,11 @@ public class Segmenter {
 		}
 
 		return segmentedResults;
+	}
+	
+	private double distance(Point p1, Point p2) {
+		return Math
+				.sqrt((Math.pow((p1.x - p2.x), 2) + Math.pow(p1.y - p2.y, 2)));
 	}
 
 	private int maxBinValue(int bin) {
