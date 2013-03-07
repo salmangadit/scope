@@ -69,8 +69,11 @@ public class ResultActivity extends Activity {
  		@Override
  		public void onClick(View view) {
  			// Activity to open Main
- 			Intent intent = new Intent(a, MainActivity.class);
- 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+// 			Intent intent = new Intent(a, MainActivity.class);
+// 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+// 			startActivity(intent);
+// 			
+ 			Intent intent = new Intent(a, Contacts.class);
  			startActivity(intent);
  		}
  	}
