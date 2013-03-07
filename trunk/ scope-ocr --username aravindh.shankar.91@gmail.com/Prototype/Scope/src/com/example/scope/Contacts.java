@@ -1,6 +1,7 @@
 package com.example.scope;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -24,6 +25,13 @@ import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 
 public class Contacts extends Activity {
+	EditText etName;
+	EditText etMobile;
+	EditText etFax;
+	EditText etEmail;
+	EditText etAddress;
+
+	List<SegmentationResult> ocrResults;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -31,25 +39,33 @@ public class Contacts extends Activity {
 		setContentView(R.layout.activity_contacts);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
+		etName = (EditText) findViewById(R.id.et_name);
+		etMobile = (EditText) findViewById(R.id.et_mobile_phone);
+		etFax = (EditText) findViewById(R.id.et_home_phone);
+		etEmail = (EditText) findViewById(R.id.et_home_email);
+		etAddress = (EditText) findViewById(R.id.et_work_email);
+
+		Globals appState = ((Globals) getApplicationContext());
+		ocrResults = appState.getSegmentationResult();
+		
+		ArrayList<String> extractedStrings = this.extractStrings(ocrResults);
+		
+		StringParser parser = new StringParser();
+		ParsedResults results = new ParsedResults();
+		results = parser.CardParse(extractedStrings);
+		
+		//Update fields
+		etName.setText(results.name);
+		etMobile.setText(results.numbers);
+		etEmail.setText(results.emails);
+		etFax.setText(results.fax);
+		etAddress.setText(results.address);
+
 		// Creating a button click listener for the "Add Contact" button
 		OnClickListener addClickListener = new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				// Getting reference to Name EditText
-				EditText etName = (EditText) findViewById(R.id.et_name);
-
-				// Getting reference to Mobile EditText
-				EditText etMobile = (EditText) findViewById(R.id.et_mobile_phone);
-
-				// Getting reference to HomePhone EditText
-				EditText etHomePhone = (EditText) findViewById(R.id.et_home_phone);
-
-				// Getting reference to HomeEmail EditText
-				EditText etHomeEmail = (EditText) findViewById(R.id.et_home_email);
-
-				// Getting reference to WorkEmail EditText
-				EditText etWorkEmail = (EditText) findViewById(R.id.et_work_email);
 
 				ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
@@ -100,8 +116,8 @@ public class Contacts extends Activity {
 						.withValue(ContactsContract.Data.MIMETYPE,
 								Phone.CONTENT_ITEM_TYPE)
 						.withValue(Phone.NUMBER,
-								etHomePhone.getText().toString())
-						.withValue(Phone.TYPE, Phone.TYPE_HOME).build());
+								etFax.getText().toString())
+						.withValue(Phone.TYPE, Phone.TYPE_FAX_HOME).build());
 
 				// Adding insert operation to operations list
 				// to insert Home Email in the table ContactsContract.Data
@@ -113,7 +129,7 @@ public class Contacts extends Activity {
 						.withValue(ContactsContract.Data.MIMETYPE,
 								Email.CONTENT_ITEM_TYPE)
 						.withValue(Email.ADDRESS,
-								etHomeEmail.getText().toString())
+								etEmail.getText().toString())
 						.withValue(Email.TYPE, Email.TYPE_HOME).build());
 
 				// Adding insert operation to operations list
@@ -124,10 +140,10 @@ public class Contacts extends Activity {
 								ContactsContract.Data.RAW_CONTACT_ID,
 								rawContactID)
 						.withValue(ContactsContract.Data.MIMETYPE,
-								Email.CONTENT_ITEM_TYPE)
-						.withValue(Email.ADDRESS,
-								etWorkEmail.getText().toString())
-						.withValue(Email.TYPE, Email.TYPE_WORK).build());
+								CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+						.withValue(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS,
+								etAddress.getText().toString())
+						.withValue(CommonDataKinds.StructuredPostal.TYPE, CommonDataKinds.StructuredPostal.TYPE_WORK).build());
 
 				try {
 					// Executing all the insert operations as a single database
@@ -176,6 +192,17 @@ public class Contacts extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_contacts, menu);
 		return true;
+	}
+
+	private ArrayList<String> extractStrings(List<SegmentationResult> ocr) {
+		ArrayList<String> extracted = new ArrayList<String>();
+
+		for (int i = 0; i < ocr.size(); i++) {
+			if (ocr.get(i).Result.trim() != "")
+				extracted.add(ocr.get(i).Result);
+		}
+		
+		return extracted;
 	}
 
 	@Override

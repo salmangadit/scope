@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Scope</string>
@@ -23,12 +24,13 @@
     <string name="save_settings">Save Settings</string>
     <string name="upload_file">From Gallery</string>
     <string name="title_activity_contacts">Add to Contacts</string>
-    
     <string name="hnt_et_name">Display Name</string>
     <string name="hnt_et_mobile_phone">Mobile Phone</string>
-    <string name="hnt_et_home_phone">Home Phone</string>
-    <string name="hnt_et_home_email">Home Email</string>
-    <string name="hnt_et_work_email">Work Email</string>
+    <string name="hnt_et_home_phone">Fax</string>
+    <string name="hnt_et_home_email">Email</string>
+    <string name="hnt_et_work_email">Address</string>
     <string name="str_btn_add">Add Contact</string>
     <string name="str_btn_contacts">Open Contacts List</string>
+    <string name="title_activity_central_progress">CentralProgressActivity</string>
+
 </resources>

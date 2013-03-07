@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.scope"
+    android:installLocation="preferExternal"
     android:versionCode="1"
-    android:versionName="1.0"
-    android:installLocation="preferExternal"  >
+    android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -22,17 +23,17 @@
         android:required="false" />
 
     <application
-        android:name=".Globals"
+        android:name="com.example.scope.Globals"
         android:icon="@drawable/segoe"
         android:theme="@style/AppTheme"
         android:title="@string/app_name" >
         <activity
-            android:name=".Splashscreen"
+            android:name="com.example.scope.Splashscreen"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.scope.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,31 +42,35 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PreProcess"
+            android:name="com.example.scope.PreProcess"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".CropScreen"
+            android:name="com.example.scope.CropScreen"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".Cropping"
+            android:name="com.example.scope.Cropping"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".Ocrmain"
+            android:name="com.example.scope.Ocrmain"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ResultActivity"
+            android:name="com.example.scope.ResultActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".Contacts"
+            android:name="com.example.scope.Contacts"
             android:label="@string/title_activity_contacts" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.scope.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.example.scope.CentralProgressActivity"
+            android:label="@string/title_activity_central_progress" >
         </activity>
     </application>
 
