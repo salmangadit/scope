@@ -21,11 +21,7 @@ import android.widget.TextView;
 public class PreProcess extends Activity {
 
 	private static final String TAG = "Scope.java";
-	static {
-		if (!OpenCVLoader.initDebug()) {
-			Log.e(TAG, "Some Error!");
-		}
-	}
+	
 	public double alpha = 3.0;
 	public double beta = 0;
 	public Bitmap myimage;

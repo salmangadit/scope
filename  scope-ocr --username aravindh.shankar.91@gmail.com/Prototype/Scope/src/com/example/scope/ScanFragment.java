@@ -222,8 +222,8 @@ public class ScanFragment extends Fragment {
 			e.printStackTrace();
 		}
 
-		EdgeDetection detector = new EdgeDetection(context, filepath);
-		Uri EdgeDetectedImage = detector.EdgeDetect();
+		EdgeDetection detector = new EdgeDetection(context, Uri.fromFile(file), filepath);
+		Uri EdgeDetectedImage = detector.AutoRotation();
 
 		// Passing intent over to Ocrmain class
 		Intent intent = new Intent(context, CropScreen.class);

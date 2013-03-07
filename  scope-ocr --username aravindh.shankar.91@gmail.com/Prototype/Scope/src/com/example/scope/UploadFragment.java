@@ -89,9 +89,9 @@ public class UploadFragment extends Fragment {
 			cursor.close();
 			Log.v(TAG, "9.. Pass");
 			Log.v(TAG, filePath);
- 
-			EdgeDetection detector = new EdgeDetection(a, filePath);
-			Uri EdgeDetectedImage = detector.EdgeDetect();
+			
+			EdgeDetection detector = new EdgeDetection(a, selectedImage, filePath);
+			Uri EdgeDetectedImage = detector.AutoRotation();
 			
 			//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filePath);
 			//Log.v(TAG, "Image Selected");
