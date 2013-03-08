@@ -229,7 +229,7 @@ public class EdgeDetection {
 	                		 maxcosine = Math.max(maxcosine, cosine);
                          }
 	                	 
-	                	 if( maxcosine < 0.3 ) {
+	                	 if( maxcosine < 1.0 ) {
 	                		 MatOfPoint temp = new MatOfPoint();
 	                		 approx.convertTo(temp, CvType.CV_32S);
 	                         squares.add(temp);
@@ -327,30 +327,41 @@ public class EdgeDetection {
 		MatOfPoint2f src_vertices = new MatOfPoint2f();
 		MatOfPoint2f dst_vertices = new MatOfPoint2f();
 		
-		List<Point> src_vert = src_vertices.toList();
-		List<Point> dst_vert = dst_vertices.toList();
+		List<Point> src_vert = new ArrayList<Point>();
+		List<Point> dst_vert = new ArrayList<Point>();
 		
 		Point[] pts = new Point[4];
 		rotated.points(pts);
 		
-		src_vert.set(0, pts[0]);
-		src_vert.set(1, pts[1]);
-		src_vert.set(2, pts[3]);
+		src_vert.add(pts[1]);
+		src_vert.add(pts[2]);
+		src_vert.add(pts[0]);
+		src_vert.add(pts[3]);
+//		src_vert.set(0, pts[0]);
+//		src_vert.set(1, pts[1]);
+//		src_vert.set(2, pts[3]);
 		
-		dst_vert.set(0, new Point(0,0));
-		dst_vert.set(1, new Point(rotated.boundingRect().width-1,0));
-		dst_vert.set(2, new Point(0, rotated.boundingRect().height-1));
+		dst_vert.add(new Point(0,0));
+		dst_vert.add(new Point(rotated.boundingRect().width-1,0));
+		dst_vert.add(new Point(0, rotated.boundingRect().height-1));
+		dst_vert.add(new Point(rotated.boundingRect().width-1,rotated.boundingRect().height-1));
+//		dst_vert.set(0, new Point(0,0));
+//		dst_vert.set(1, new Point(rotated.boundingRect().width-1,0));
+//		dst_vert.set(2, new Point(0, rotated.boundingRect().height-1));
 		
 		src_vertices.fromList(src_vert);
 		dst_vertices.fromList(dst_vert);
 
-		Mat affine_matrix = Imgproc.getAffineTransform(src_vertices, dst_vertices);
+		//Mat affine_matrix = Imgproc.getAffineTransform(src_vertices, dst_vertices);
+
+		Mat affine_matrix = Imgproc.getPerspectiveTransform(src_vertices, dst_vertices);
 		
 		Mat rotatedMat = new Mat(src.size(),src.type());
 		
 		Log.v(TAG,"Size" + size.width + size.height);
 		
-		Imgproc.warpAffine(src, rotatedMat, affine_matrix, src.size(),Imgproc.INTER_CUBIC);
+		//Imgproc.warpAffine(src, rotatedMat, affine_matrix, src.size(),Imgproc.INTER_CUBIC);
+		Imgproc.warpPerspective(src, rotatedMat, affine_matrix, src.size(),Imgproc.INTER_CUBIC);
 		
 		Log.v(TAG,"RotatedMat found " + rotatedMat.total());
 		
@@ -400,8 +411,8 @@ public class EdgeDetection {
 			Rect roi = new Rect(p[0],p[2]);
 			Mat cropped = new Mat(rotatedMat,roi);
 			
-			Bitmap croppedImg = Bitmap.createBitmap(cropped.cols(), cropped.rows(),  Bitmap.Config.ARGB_8888);               
-			Utils.matToBitmap(cropped, croppedImg);
+			Bitmap croppedImg = Bitmap.createBitmap(rotatedMat.cols(), rotatedMat.rows(),  Bitmap.Config.ARGB_8888);               
+			Utils.matToBitmap(rotatedMat, croppedImg);
 			
 			//Utils.matToBitmap(canvas, destImage);
 			Log.v(TAG, "Mat to Bitmap Successful");
