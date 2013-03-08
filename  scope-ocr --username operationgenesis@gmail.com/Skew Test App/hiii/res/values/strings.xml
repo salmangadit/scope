@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">ScanMe</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">ScanMe</string>
+    <string name="done">Done</string>
+    <string name="receive">Received</string>
+    <color name="black">#000000</color>
+
+</resources>
