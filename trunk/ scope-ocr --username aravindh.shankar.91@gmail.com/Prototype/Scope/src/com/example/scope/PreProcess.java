@@ -80,9 +80,14 @@ public class PreProcess extends Activity {
 		
 		Analyse analyser=new Analyse(this.getApplicationContext(),segmentedResults);
 		segmentedResults = analyser.adaptiveSplitter();
+		// Cleaner function
+		for(int i=0;i<segmentedResults.size();i++)
+		{
+		Threshold thresh = new Threshold(this.getApplicationContext(),segmentedResults.get(i),"clean"+i+".bmp");
+		segmentedResults.set(i,  thresh.thresh_binary(1, 255));
+		}
 		
 		////////////// ONLY IF NUS CARD FOR NOW
-		
 		for(int i=0;i<segmentedResults.size();i++)
 		{
 		Analyse fill = new Analyse(this.getApplicationContext(),segmentedResults.get(i),"temple"+i+".bmp");
