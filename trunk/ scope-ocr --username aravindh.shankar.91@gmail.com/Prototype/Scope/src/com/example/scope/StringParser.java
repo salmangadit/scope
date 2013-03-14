@@ -1,4 +1,5 @@
 package com.example.scope;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -11,15 +12,11 @@ public class StringParser {
 			"e-mail" };
 	private final String[] SITE_DICT = new String[] { "yahoo", "gmail",
 			"google", "hotmail", "nus.edu.sg" };
-	private final String[] DOMAIN_DICT = new String[] { "net", "com", "edu",
-			"org" };
+	private final String[] DOMAIN_DICT = new String[] { "http", "www", "net",
+			"com", "edu", "org" };
+	private final String[] WEBSITE_DICT = new String[] { "website", "site" };
 	private final String[] PHONE_DICT = new String[] { "phone", "cell",
 			"telephone", "mobile", "fax", "tel" };
-	// private final String[] FAX_DICT = new String[] { "fax", "f" };
-	private final String[] PATHS = {
-			"C:\\Users\\Asus\\Desktop\\FYP Stuff\\ParserTest.txt",
-			"C:\\Users\\Asus\\Desktop\\FYP Stuff\\ParserTest2.txt",
-			"C:\\Users\\Asus\\Desktop\\FYP Stuff\\ParserTest3.txt" };
 	private final String WORD_SINGAPORE = "singapore";
 
 	public String addressString = "";
@@ -27,6 +24,7 @@ public class StringParser {
 	public String nameString = "";
 	public String numberString = "";
 	public String faxString = "";
+	public String websiteString = "";
 	public String inputString;
 	private String text;
 
@@ -34,10 +32,12 @@ public class StringParser {
 	private ArrayList<String> address_linesList = new ArrayList<String>();
 	private ArrayList<String> numbers_linesList = new ArrayList<String>();
 	private ArrayList<String> email_linesList = new ArrayList<String>();
+	private ArrayList<String> site_linesList = new ArrayList<String>();
 
 	private ArrayList<AddressObj> addressList = new ArrayList<AddressObj>();
 	private ArrayList<EmailObj> emailList = new ArrayList<EmailObj>();
 	private ArrayList<PhoneObj> numberList = new ArrayList<PhoneObj>();
+	private ArrayList<SiteObj> siteList = new ArrayList<SiteObj>();
 
 	private String[] wordsList;
 	private String[] linesArray;
@@ -49,15 +49,15 @@ public class StringParser {
 	private int endLine = -1;
 	private int addressConfidence = 0;
 
-	public StringParser(){
-		
+	public StringParser() {
+
 	}
-	
+
 	public ParsedResults CardParse(ArrayList<String> input_strings) {
 		for (String input : input_strings) {
 			text = input.trim();
 			linesArray = text.split("\n");
-			for(int i = 0; i < linesArray.length; ++i){
+			for (int i = 0; i < linesArray.length; ++i) {
 				linesArray[i] = linesArray[i].replaceAll("\\s+", " ");
 				if (!(linesArray[i].isEmpty())) {
 					linesList.add(linesArray[i].toLowerCase());
@@ -71,6 +71,7 @@ public class StringParser {
 			address_linesList = linesList;
 			numbers_linesList = linesList;
 			FilterAddress();
+			FilterWeb();
 			FilterEmail();
 			FilterPhone();
 			FilterMisc();
@@ -173,26 +174,77 @@ public class StringParser {
 					trackLines[lineCount] = 1;
 				} else if (LevenshteinDistance(wordsList[i], ADDRESS_DICT[j]) < 3) {
 					if (wordsList[i].length() >= ADDRESS_DICT[j].length()) {
+
 						if (startLine < 0) {
-							wordsList[i] = wordsList[i].replaceAll("[^\\w\\s]+", "");
-							String temp = address_linesList.get(lineCount)
-									.replaceAll(wordsList[i], ADDRESS_DICT[j]);
-							address_linesList.set(lineCount, temp);
 							startLine = lineCount;
 						} else {
 							endLine = lineCount;
 						}
+						wordsList[i] = wordsList[i]
+								.replaceAll("[^\\w\\s]+", "");
+						String temp = address_linesList.get(lineCount)
+								.replaceAll(wordsList[i], ADDRESS_DICT[j]);
+						address_linesList.set(lineCount, temp);
 						trackLines[lineCount] = 1;
 					}
 				}
-				if (wordsList[i].contains("@")) {
-					email_flag = 1;
+			}
+
+			wordsList[i] = wordsList[i].replaceAll(":", " ");
+			wordsList[i] = wordsList[i].replaceAll("-", " ");
+			wordsList[i] = wordsList[i].replaceAll("\\s+", " ");
+
+			for (int k = 0; k < WEBSITE_DICT.length; ++k) {
+				if (wordsList[i].equals(WEBSITE_DICT[k])
+						|| (LevenshteinDistance(wordsList[i], WEBSITE_DICT[k]) < 3)) {
+					site_linesList.add(address_linesList.get(lineCount));
 					trackLines[lineCount] = 1;
 				}
 			}
+
+			if (wordsList[i].contains("@")) {
+				email_flag = 1;
+				trackLines[lineCount] = 1;
+			}
+
+			if (email_flag == 1) {
+				email_linesList.add(address_linesList.get(lineCount));
+			}
 		}
-		if (email_flag == 1) {
-			email_linesList.add(address_linesList.get(lineCount));
+	}
+
+	// Does check to identify valid Websites
+	private void FilterWeb() {
+		int site_confidence = 0;
+		for (String line : site_linesList) {
+			wordsList = line.split(" ");
+			for (String word : wordsList) {
+				site_confidence = 0;
+				for (String domain : DOMAIN_DICT) {
+					if (word.contains(domain)) {
+						site_confidence++;
+					}
+				}
+				if( site_confidence > 0 ){
+					siteList.add(new SiteObj(word));
+				}
+			}
+		}
+		GetWeb();
+	}
+	
+	// Picks site with highest confidence
+	private void GetWeb() {
+		int max = 0;
+		for (SiteObj site_obj : siteList) {
+			if (site_obj.confidence >= max) {
+				max = site_obj.confidence;
+			}
+		}
+		for (SiteObj site_obj : siteList) {
+			if (site_obj.confidence == max) {
+				websiteString += site_obj.siteName + " ";
+			}
 		}
 	}
 
@@ -388,26 +440,27 @@ public class StringParser {
 		for (int j = 0; j < linesList.size(); ++j) {
 			if (trackLines[j] == 0) {
 				namestring = linesList.get(j);
-			}
-			temp_string = namestring.replaceAll("[^\\w\\s]+", "");
-			address = addressString.toLowerCase();
-			address = address.replaceAll("[^\\w\\s]+", "");
+				temp_string = namestring.replaceAll("[^\\w\\s]+", "");
+				address = addressString.toLowerCase();
+				address = address.replaceAll("[^\\w\\s]+", "");
 
-			if (!(address.contains(temp_string))) {
-				wordsList = namestring.split(" ");
-				temp_string = "";
-				for (int i = 0; i < wordsList.length; ++i) {
-					wordsList[i] = wordsList[i].replaceAll("[^\\w\\s]+", "");
-					StringBuilder word = new StringBuilder(wordsList[i]);
-					word.setCharAt(0, Character.toUpperCase(word.charAt(0)));
-					wordsList[i] = word.toString();
-					nameString += wordsList[i] + " ";
+				if (!(address.contains(temp_string))) {
+					wordsList = namestring.split(" ");
+					temp_string = "";
+					for (int i = 0; i < wordsList.length; ++i) {
+						wordsList[i] = wordsList[i]
+								.replaceAll("[^\\w\\s]+", "");
+						StringBuilder word = new StringBuilder(wordsList[i]);
+						word.setCharAt(0, Character.toUpperCase(word.charAt(0)));
+						wordsList[i] = word.toString();
+						nameString += wordsList[i] + " ";
+					}
 				}
 			}
 		}
 		nameString = nameString.trim();
 	}
-
+	
 	// Calculates minimum number of insertions, deletions and substitutions
 	// required to convert str1 to str2 based on Levenshtein's Algorithm
 	private int LevenshteinDistance(String str1, String str2) {
@@ -451,10 +504,12 @@ public class StringParser {
 		address_linesList.clear();
 		numbers_linesList.clear();
 		email_linesList.clear();
+		site_linesList.clear();
 		linesList.clear();
 		addressList.clear();
 		emailList.clear();
 		numberList.clear();
+		siteList.clear();
 		lineCount = 0;
 	}
 }
