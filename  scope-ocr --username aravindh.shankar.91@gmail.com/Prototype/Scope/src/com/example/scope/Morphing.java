@@ -101,12 +101,13 @@ public class Morphing {
 		Mat destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
 		
 		if(matrix_size>=0)
-		{
+		{	Log.v(TAG, "size: "+matrix_size);
 			Size size = new Size(matrix_size,matrix_size);
 			Imgproc.erode( sourceImageMat, destImageMat, Mat.ones(size,0));	
 		}
 		else
 		{
+			Log.v(TAG,"Dilate: "+ (-matrix_size));
 			Size size = new Size(-matrix_size,-matrix_size);
 			Imgproc.dilate( sourceImageMat, destImageMat, Mat.ones(size,0));	
 		}
@@ -118,7 +119,7 @@ public class Morphing {
 		File file = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
+				"temp_morph.bmp");
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);

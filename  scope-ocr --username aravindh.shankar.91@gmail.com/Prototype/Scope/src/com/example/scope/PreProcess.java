@@ -71,13 +71,24 @@ public class PreProcess extends Activity {
 		progress.setText("Applying adaptive thresholding");
 		Adpt initadpt = new Adpt(this.getApplicationContext(),ppimage1,"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
+		Morphing morphing1 = new Morphing(this.getApplicationContext(),ppimage2);
+		Uri ppimage3 = morphing1.erode(20);
 		dialog.setMessage("Applying line segmentation");
 		progress.setText("Applying line segmentation");
-		SegmentLine segmenter = new SegmentLine(this.getApplicationContext(),ppimage2, ppimage1);
+		SegmentLine segmenter = new SegmentLine(this.getApplicationContext(),ppimage3, ppimage1);
 		List<Uri> segmentedResults = segmenter.segLine();
 		
 		Analyse analyser=new Analyse(this.getApplicationContext(),segmentedResults);
-		segmentedResults = analyser.adaptiveSplitter();	
+		segmentedResults = analyser.adaptiveSplitter();
+		
+		////////////// ONLY IF NUS CARD FOR NOW
+		
+		for(int i=0;i<segmentedResults.size();i++)
+		{
+		Analyse fill = new Analyse(this.getApplicationContext(),segmentedResults.get(i),"temple"+i+".bmp");
+		segmentedResults.set(i,  fill.filler());
+		}
+		///////////////////////////////////////////
 		
 		Globals appState = ((Globals) getApplicationContext());
 		appState.setAdaptiveResult(segmentedResults);

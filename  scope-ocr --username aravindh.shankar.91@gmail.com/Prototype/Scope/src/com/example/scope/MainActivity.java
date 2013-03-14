@@ -1,17 +1,27 @@
 package com.example.scope;
 
+import org.opencv.android.OpenCVLoader;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
 	protected static String _path;
 	protected boolean _taken;
-
+	private static final String TAG = "Scope.java";
+	
+	static {
+		if (!OpenCVLoader.initDebug()) {
+			Log.e(TAG, "Hello, Some Error!");
+		}
+	}
+	
 	public static final String DATA_PATH = Environment
 			.getExternalStorageDirectory().toString() + "/Scope/";
 	//private static final String TAG = "Scope.java";

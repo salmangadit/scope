@@ -73,8 +73,34 @@ public class Adpt {
 				.zeros(destImageMat.size(), destImageMat.type());
 		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_RGB2GRAY);
 		
-	
+		Log.v(TAG, "Size = 1");
 		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 5, 5);
+		
+		Utils.matToBitmap(final_dest_mat, destImage);
+
+		Log.v(TAG, "destImage Size: " + destImage.getByteCount());
+
+		store();
+		Log.v(TAG, uri.toString());
+		return uri;
+	}
+	
+	public Uri thresh(int value) {
+		initiate();
+		int order = 1;;
+		if(value!=0)
+		order = Imgproc.ADAPTIVE_THRESH_MEAN_C;
+		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
+
+		destImage = sourceImage;
+
+		Utils.bitmapToMat(sourceImage, sourceImageMat);
+		Mat final_dest_mat = Mat
+				.zeros(destImageMat.size(), destImageMat.type());
+		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_RGB2GRAY);
+		
+		Log.v(TAG, "Size = 1");
+		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, order, Imgproc.THRESH_BINARY, 5, 5);
 		
 		Utils.matToBitmap(final_dest_mat, destImage);
 

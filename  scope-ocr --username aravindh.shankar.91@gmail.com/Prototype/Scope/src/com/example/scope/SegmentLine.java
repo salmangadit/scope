@@ -165,6 +165,8 @@ public class SegmentLine {
 			boundingRectangles.add(boundingRectangles_temp.get(i));
 		}
 
+		if(boundingRectangles.size()>10)
+			{Log.v(TAG,"tooo many "+boundingRectangles.size());return segmentedResults;}
 		Log.v(TAG, "bound " + boundingRectangles.size());
 		for (int i = 0; i < boundingRectangles.size(); i++) {
 			Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),

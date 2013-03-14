@@ -84,9 +84,9 @@ public class Adptrev {
 			{
 			   double diff = MID - destImageMat.get(i, j)[0];
 			   if (diff>0)
-				   destImageMat.put(i, j,(int)(MID+diff));
+				   destImageMat.put(i, j,255);
 			   else
-				   destImageMat.put(i, j,(int)(MID+diff));
+				   destImageMat.put(i, j,0);
 			}
 		
 		Utils.matToBitmap(destImageMat, destImage);
