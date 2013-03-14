@@ -67,6 +67,7 @@ public class Threshold {
 	Mat destImageMat = new Mat();
 	Bitmap sourceImage = null;
 	Bitmap destImage = null;
+	String file_name = "clean.bmp";
 	Uri uri;
 
 	private static final String TAG = "Scope.java";
@@ -75,6 +76,12 @@ public class Threshold {
 	public Threshold(Context c, Uri inputUri) {
 		currContext = c;
 		inputImageUri = inputUri;
+	}
+	
+	public Threshold(Context c, Uri inputUri, String store) {
+		currContext = c;
+		inputImageUri = inputUri;
+		file_name = store;
 	}
 
 	// Method to set image only, if class has already been instantiated
@@ -236,7 +243,7 @@ public class Threshold {
 		File file = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
+						file_name);
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);
