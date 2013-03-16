@@ -33,6 +33,12 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 				preprocess.getApplicationContext());
 		boolean isNUS = matcher.TM();
 
+		if (isNUS){
+			Log.v(TAG, "This is an NUS card");
+		}
+		else{
+			Log.v(TAG, "This is NOT an NUS card");
+		}
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
 		Uri ppimage = grey.greyscale();
 
@@ -77,7 +83,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 				segmentedResults.set(i, fill.filler());
 			}
 		}
-		// /////////////////////////////////////////
+		
 		Globals appState = ((Globals) preprocess.getApplicationContext());
 		appState.setAdaptiveResult(segmentedResults);
 

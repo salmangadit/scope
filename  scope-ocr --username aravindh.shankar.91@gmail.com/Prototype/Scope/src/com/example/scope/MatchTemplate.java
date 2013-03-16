@@ -160,7 +160,7 @@ public class MatchTemplate {
 		if((Math.abs(origin.x - matchLoc.x)<= 300) && (Math.abs(origin.y - matchLoc.y)<= 300) && (Math.abs(test_end.x - rect_end.x)<= 300) && (Math.abs(test_end.y - rect_end.y)<= 300))
 			{
 				confirm=true;
-				Log.i(TAG,"Templates match! This is an NUS card! "+confirm);
+				Log.i(TAG,"Templates match! This is absolutely an NUS card! "+confirm);
 			}
 		else
 			{
