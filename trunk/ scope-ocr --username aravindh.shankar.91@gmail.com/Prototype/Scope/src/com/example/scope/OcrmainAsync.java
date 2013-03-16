@@ -48,7 +48,7 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 	@Override
 	protected String doInBackground(Void... params) {
 		Log.v(TAG, "entering tess");
-
+		progressDialog.setMessage("Performing OCR Operation");
 		// Getting uri of image/cropped image
 		try {
 			myimage = MediaStore.Images.Media.getBitmap(

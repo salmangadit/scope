@@ -32,5 +32,6 @@
     <string name="str_btn_add">Add Contact</string>
     <string name="str_btn_contacts">Open Contacts List</string>
     <string name="title_activity_central_progress">CentralProgressActivity</string>
+    <string name="title_activity_adaptive_pre_process">AdaptivePreProcess</string>
 
 </resources>
