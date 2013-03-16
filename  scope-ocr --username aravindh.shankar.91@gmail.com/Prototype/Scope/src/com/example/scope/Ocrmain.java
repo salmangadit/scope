@@ -106,6 +106,7 @@ public class Ocrmain extends Activity {
 			result.X = getCoordsX(allCoords.get(i));
 			result.Y = getCoordsY(allCoords.get(i));
 			result.image = allText.get(i);
+			// TessBase starts
 			TessBaseAPI baseApi = new TessBaseAPI();
 
 			baseApi.setDebug(true);
@@ -113,9 +114,8 @@ public class Ocrmain extends Activity {
 			baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
 			Log.v(TAG, "Before baseApi");
 			
-			
 			new OcrmainAsync(this, allText.get(i), DATA_PATH, result, baseApi)
-					.executeOnExecutor(executor);
+					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 		// Intent intent = new Intent(this, Contacts.class);
 		// startActivity(intent);
