@@ -1,13 +1,15 @@
 package com.example.scope;
 
+import java.util.List;
+
 import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class PreProcessAsync extends AsyncTask<Void, Void, String> {
+public class PreProcessAsync extends AsyncTask<Void, String, String> {
 	PreProcess preprocess;
-	ProgressDialog progressDialog;
+	ProgressDialog progress;
 	final Uri uri;
 	Uri process_uri_1, process_uri_2;
 	private static final String TAG = "Scope.java";
@@ -18,41 +20,85 @@ public class PreProcessAsync extends AsyncTask<Void, Void, String> {
 	}
 
 	protected void onPreExecute() {
-		progressDialog = ProgressDialog.show(preprocess, "Pre-Processing",
+		progress = ProgressDialog.show(preprocess, "Pre-Processing",
 				"Applying Pre Processing filters to image", true);
 	};
 
 	@Override
 	protected String doInBackground(Void... params) {
-//		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
-//				uri);
-//		process_uri_1 = smoother.BilateralFilter();
-//
-//		Threshold thresh = new Threshold(preprocess.getApplicationContext(),
-//				process_uri_1);
-//		double value = thresh.otsu();
-//		Log.v(TAG, "otsu  " + value);
-//		process_uri_2 = thresh.thresh_binary(value, 255);
-//
-//		Log.v(TAG, process_uri_2.toString());
-//		preprocess.result_uri = process_uri_2;
-//
-//		
-		Log.v(TAG,"finished background");
+		progress.setMessage("Greyscaling image");
+
+		// Check if card is NUS card
+		MatchTemplate matcher = new MatchTemplate(uri,
+				preprocess.getApplicationContext());
+		boolean isNUS = matcher.TM();
+
+		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
+		Uri ppimage = grey.greyscale();
+
+		// progress.setMessage("Applying bilateral filter");
+		publishProgress("Applying bilateral filter");
+		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
+				ppimage);
+		Uri ppimage1 = smoother.BilateralFilter();
+
+		// progress.setMessage("Applying adaptive thresholding");
+		publishProgress("Applying adaptive thresholding");
+		Adpt initadpt = new Adpt(preprocess.getApplicationContext(), ppimage1,
+				"adpt1.bmp");
+		Uri ppimage2 = initadpt.thresh();
+
+		// progress.setMessage("Applying line segmentation");
+		publishProgress("Applying line segmentation");
+		SegmentLine segmenter = new SegmentLine(
+				preprocess.getApplicationContext(), ppimage2, ppimage1);
+		List<Uri> segmentedResults = segmenter.segLine();
+
+		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
+				segmentedResults);
+		segmentedResults = analyser.adaptiveSplitter();
+
+		publishProgress("Cleaning segments");
+		// Cleaner function
+		for (int i = 0; i < segmentedResults.size(); i++) {
+			Threshold thresh = new Threshold(
+					preprocess.getApplicationContext(),
+					segmentedResults.get(i), "clean" + i + ".bmp");
+			segmentedResults.set(i, thresh.thresh_binary(1, 255));
+		}
+
+		
+		// ONLY IF NUS CARD FOR NOW
+		if (isNUS) {
+			publishProgress("Applying cleaning for NUS card");
+			for (int i = 0; i < segmentedResults.size(); i++) {
+				Analyse fill = new Analyse(preprocess.getApplicationContext(),
+						segmentedResults.get(i), "temple" + i + ".bmp");
+				segmentedResults.set(i, fill.filler());
+			}
+		}
+		// /////////////////////////////////////////
+		Globals appState = ((Globals) preprocess.getApplicationContext());
+		appState.setAdaptiveResult(segmentedResults);
+
+		// progress.setMessage("Pre-processing complete.");
+		publishProgress("Pre-processing complete.");
+
+		Log.v(TAG, "finished background");
 		preprocess.result_uri = uri;
 		return null;
 	}
-	
+
+	@Override
+	protected void onProgressUpdate(String... msg) {
+		progress.setMessage(msg[0]);
+	}
+
 	@Override
 	protected void onPostExecute(String string) {
-		Log.v(TAG,"started post background");
-		progressDialog.dismiss();
-		preprocess.runOnUiThread(new Runnable() {
-			public void run() {
-				// stuff that updates ui
-				preprocess.setImageURI(uri);
-			}
-		});
+		Log.v(TAG, "started post background");
+		progress.dismiss();
+		preprocess.nextActivity();
 	}
 
 }

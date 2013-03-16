@@ -73,6 +73,10 @@
             android:name="com.example.scope.CentralProgressActivity"
             android:label="@string/title_activity_central_progress" >
         </activity>
+        <activity
+            android:name="com.example.scope.AdaptivePreProcess"
+            android:label="@string/title_activity_adaptive_pre_process" >
+        </activity>
     </application>
 
 </manifest>
