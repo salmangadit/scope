@@ -29,9 +29,9 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		progress.setMessage("Greyscaling image");
 
 		// Check if card is NUS card
-		MatchTemplate matcher = new MatchTemplate(uri,
-				preprocess.getApplicationContext());
-		boolean isNUS = matcher.TM();
+//		MatchTemplate matcher = new MatchTemplate(uri,
+//				preprocess.getApplicationContext());
+		boolean isNUS = false;
 
 		if (isNUS){
 			Log.v(TAG, "This is an NUS card");

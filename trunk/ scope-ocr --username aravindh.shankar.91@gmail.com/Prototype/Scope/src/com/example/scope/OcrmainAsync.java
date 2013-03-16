@@ -48,7 +48,7 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 	@Override
 	protected String doInBackground(Void... params) {
 		Log.v(TAG, "entering tess");
-		progressDialog.setMessage("Performing OCR Operation");
+//		progressDialog.setMessage("Performing OCR Operation");
 		// Getting uri of image/cropped image
 		try {
 			myimage = MediaStore.Images.Media.getBitmap(
@@ -73,11 +73,11 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 		myimage = BitmapFactory.decodeStream(input, null, opt);
 		Log.v(TAG, "bitmap after comp:" + myimage.getByteCount());
 
-		// TessBase starts
+//		// TessBase starts
 //		TessBaseAPI baseApi = new TessBaseAPI();
 //
 //		baseApi.setDebug(true);
-//		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_CUBE_ONLY);
+//		baseApi.init(DATA_PATH, lang, TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED);
 //		baseApi.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD);
 //		Log.v(TAG, "Before baseApi");
 		baseApi.setImage(myimage);

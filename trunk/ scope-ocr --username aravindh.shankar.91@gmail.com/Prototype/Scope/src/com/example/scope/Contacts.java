@@ -30,6 +30,7 @@ public class Contacts extends Activity {
 	EditText etFax;
 	EditText etEmail;
 	EditText etAddress;
+	EditText etWebsite;
 
 	List<SegmentationResult> ocrResults;
 
@@ -44,7 +45,8 @@ public class Contacts extends Activity {
 		etFax = (EditText) findViewById(R.id.et_home_phone);
 		etEmail = (EditText) findViewById(R.id.et_home_email);
 		etAddress = (EditText) findViewById(R.id.et_work_email);
-
+		etWebsite = (EditText) findViewById(R.id.et_website);
+		
 		Globals appState = ((Globals) getApplicationContext());
 		ocrResults = appState.getSegmentationResult();
 		
@@ -60,7 +62,8 @@ public class Contacts extends Activity {
 		etEmail.setText(results.emails);
 		etFax.setText(results.fax);
 		etAddress.setText(results.address);
-
+		etWebsite.setText(results.website);
+		
 		// Creating a button click listener for the "Add Contact" button
 		OnClickListener addClickListener = new OnClickListener() {
 
@@ -144,6 +147,18 @@ public class Contacts extends Activity {
 						.withValue(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS,
 								etAddress.getText().toString())
 						.withValue(CommonDataKinds.StructuredPostal.TYPE, CommonDataKinds.StructuredPostal.TYPE_WORK).build());
+				
+				//Website
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactID)
+						.withValue(ContactsContract.Data.MIMETYPE,
+								CommonDataKinds.Website.CONTENT_ITEM_TYPE)
+						.withValue(CommonDataKinds.Website.URL,
+								etWebsite.getText().toString())
+						.withValue(CommonDataKinds.Website.TYPE, CommonDataKinds.Website.TYPE_WORK).build());
 
 				try {
 					// Executing all the insert operations as a single database

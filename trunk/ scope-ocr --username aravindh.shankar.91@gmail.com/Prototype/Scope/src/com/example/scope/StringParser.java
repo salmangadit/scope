@@ -78,7 +78,7 @@ public class StringParser {
 			ClearLists();
 		}
 		return new ParsedResults(addressString, emailString, numberString,
-				nameString, faxString);
+				nameString, faxString, websiteString);
 	}
 
 	// Parses each line of retrieved text
