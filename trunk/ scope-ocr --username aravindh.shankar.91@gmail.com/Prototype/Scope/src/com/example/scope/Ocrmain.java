@@ -55,7 +55,7 @@ public class Ocrmain extends Activity {
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "enter...");
 		Log.v(TAG, "OCR...");
-
+		
 		ocrResults = new ArrayList<SegmentationResult>();
 
 		Globals appState = ((Globals) getApplicationContext());

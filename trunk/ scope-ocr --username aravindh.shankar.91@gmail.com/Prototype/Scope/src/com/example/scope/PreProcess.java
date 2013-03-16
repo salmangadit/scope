@@ -59,53 +59,6 @@ public class PreProcess extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-//		// /////////////Pre process starts
-//		progress.setText("Greyscaling image");
-//		Greyscale grey = new Greyscale(this.getApplicationContext(), image_uri);
-//		Uri ppimage = grey.greyscale();
-//
-//		dialog.setMessage("Applying bilateral filter");
-//		progress.setText("Applying bilateral filter");
-//		Smoothing smoother = new Smoothing(this.getApplicationContext(),
-//				ppimage);
-//		Uri ppimage1 = smoother.BilateralFilter();
-//		dialog.setMessage("Applying adaptive thresholding");
-//		progress.setText("Applying adaptive thresholding");
-//		Adpt initadpt = new Adpt(this.getApplicationContext(), ppimage1,
-//				"adpt1.bmp");
-//		Uri ppimage2 = initadpt.thresh();
-		Uri ppimage2 = initadpt.thresh();
-		Morphing morphing1 = new Morphing(this.getApplicationContext(),ppimage2);
-		Uri ppimage3 = morphing1.erode(20);
-		dialog.setMessage("Applying line segmentation");
-		progress.setText("Applying line segmentation");
-		SegmentLine segmenter = new SegmentLine(this.getApplicationContext(),ppimage3, ppimage1);
-		List<Uri> segmentedResults = segmenter.segLine();
-		
-		Analyse analyser=new Analyse(this.getApplicationContext(),segmentedResults);
-		segmentedResults = analyser.adaptiveSplitter();
-		// Cleaner function
-		for(int i=0;i<segmentedResults.size();i++)
-		{
-		Threshold thresh = new Threshold(this.getApplicationContext(),segmentedResults.get(i),"clean"+i+".bmp");
-		segmentedResults.set(i,  thresh.thresh_binary(1, 255));
-		}
-		
-		////////////// ONLY IF NUS CARD FOR NOW
-		for(int i=0;i<segmentedResults.size();i++)
-		{
-		Analyse fill = new Analyse(this.getApplicationContext(),segmentedResults.get(i),"temple"+i+".bmp");
-		segmentedResults.set(i,  fill.filler());
-		}
-		///////////////////////////////////////////
-		
-		Globals appState = ((Globals) getApplicationContext());
-		appState.setAdaptiveResult(segmentedResults);
-		
-		progress.setText("Pre-processing complete.");
-		dialog.dismiss();
-		////////////////Pre process ends : segmentedResults is a list of URIs of processed segments
-		
 		final Uri uri;
 		uri = image_uri;
 
@@ -128,8 +81,8 @@ public class PreProcess extends Activity {
 		// }
 		// });
 	}
-	
-	public void nextActivity(){
+
+	public void nextActivity() {
 		Intent i = new Intent(this, Ocrmain.class);
 		i.putExtra("file_path", filepath);
 		// i.putExtra("image_uri", result_uri.toString());
