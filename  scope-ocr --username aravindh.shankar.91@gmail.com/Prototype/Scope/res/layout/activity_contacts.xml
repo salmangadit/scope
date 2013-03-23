@@ -103,7 +103,7 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:textColor="@color/white"
-        android:hint="Website" />
+        android:hint="Website"/>
  
     <Button
         android:id="@+id/btn_add"
