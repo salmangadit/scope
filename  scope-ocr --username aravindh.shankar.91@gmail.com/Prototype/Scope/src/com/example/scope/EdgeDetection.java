@@ -145,7 +145,7 @@ public class EdgeDetection {
 		
 		Imgproc.medianBlur(source, blurred, 9);
 		Log.v(TAG, "Median Blur Done!");
-//        Imgproc.dilate(blurred, blurred, Mat.ones(new Size(20,20),0));
+
         
 		Mat gray0 = new Mat(blurred.size(), blurred.type());
 		Imgproc.cvtColor(gray0, gray0, Imgproc.COLOR_RGB2GRAY);
@@ -211,17 +211,7 @@ public class EdgeDetection {
 	            	contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
 	            	Imgproc.approxPolyDP(mMOP2f1, approx, Imgproc.arcLength(mMOP2f1, true)*0.02, true);
 	            	approx.convertTo(mMOP, CvType.CV_32S);
-	        
-//	            	if(Math.abs(Imgproc.contourArea(approx)) > 1000)
-//                	{
-//                		Log.v(TAG,"Area Condition Passed"+ Imgproc.contourArea(approx));
-//                	}
-//                	if(Imgproc.isContourConvex(mMOP))
-//                	{
-//                		Log.v(TAG,"Is Convex!");
-//                	}
-//                	Log.v(TAG,"Approx Size" + approx.size().toString());
-//                	
+	                   	
 	                if( approx.rows()==4 && Math.abs(Imgproc.contourArea(approx)) > 1000 && Imgproc.isContourConvex(mMOP))
 	                {
 	                	
@@ -235,7 +225,7 @@ public class EdgeDetection {
 	                		 maxcosine = Math.max(maxcosine, cosine);
                          }
 	                	 
-	                	 if( maxcosine < 0.3 ) {
+	                	 if( maxcosine < 0.2 ) {
 	                		 MatOfPoint temp = new MatOfPoint();
 	                		 approx.convertTo(temp, CvType.CV_32S);
 	                         squares.add(temp);
@@ -317,6 +307,10 @@ public class EdgeDetection {
 		double angle = rotated.angle;
 		Size size = rotated.size;
 		
+		Point[] corners = new Point[4];
+		rotated.points(corners);
+		Log.v(TAG,"Corner Top Left: "+ corners[2].x + " " + corners[2].y);
+		
 		if(angle<-45.0)
 		{
 			angle = angle + 90.0;
@@ -324,6 +318,18 @@ public class EdgeDetection {
 			size.width = size.height;
 			size.height = temp;
 		}	
+		
+		if(size.width < size.height){
+			if(corners[1].y < corners[3].y){
+				angle = angle + 90;
+			}
+			else{
+				angle = angle - 90;
+			}
+			double temp = size.width;
+			size.width = size.height;
+			size.height = temp;
+		}
 		
 		Log.v(TAG,"Final Angle Desired: " + angle);
 		
@@ -342,44 +348,19 @@ public class EdgeDetection {
 		Log.v(TAG,"Size of patch: " + size.height + " " + size.width);
 		Log.v(TAG,"Center of patch: "+ rotated.center.x + " " + rotated.center.y);
 	
-		Point[] corners = new Point[4];
-		rotated.points(corners);
-		Log.v(TAG,"Corner Top Left: "+ corners[2].x + " " + corners[2].y);
 		
-		Log.v(TAG, "Contours of Max Rectangle " + corners.length);
-		Log.v(TAG, "Points of Contour : 1) " + corners[0].x + " " + corners[0].y);
-		Log.v(TAG, "Points of Contour : 2) " + corners[1].x + " " + corners[1].y);
-		Log.v(TAG, "Points of Contour : 3) " + corners[2].x + " " + corners[2].y);
-		Log.v(TAG, "Points of Contour : 4) " + corners[3].x + " " + corners[3].y);
+		double ht = size.height;
+		double wdth = size.width;
+		Point centre_point = rotated.center;
+		Point[] p = new Point[4];
+		p[0] = new Point(centre_point.x - (wdth/2), centre_point.y + (ht/2));
+		p[1] = new Point(centre_point.x - (wdth/2), centre_point.y - (ht/2));
+		p[2] = new Point(centre_point.x + (wdth/2), centre_point.y - (ht/2));
+		p[3] = new Point(centre_point.x + (wdth/2), centre_point.y + (ht/2));
 		
-//		Rect roi = new Rect(corners[0],corners[2]);
-//		
-//		Mat cropped = new Mat(rotatedMat,roi);
-		
-		//Imgproc.getRectSubPix(rotatedMat, size, rotated.center, cropped);
-		
-		//Log.v(TAG,"Cropped from rotated image! " + cropped.total());
-//		//Rect roi = new Rect(p[0],p[2]);
-//		Log.v(TAG,"Rectangle ht = "+ roi.height);
-//		Log.v(TAG,"Rectangle wt = "+ roi.width);
-//		Log.v(TAG,"Rectangle x = " + roi.x);
-//		Log.v(TAG,"Rectangle y = "+ roi.y);
-//		
-//		Mat rectangle = new Mat(src,roi);
-//		
-//		Log.v(TAG,"Rectangle Mat= " + rectangle.total());
-
-//		org.opencv.core.Scalar s1 = new Scalar(255);
-//		Imgproc.drawContours(canvas, squares, maxareaidx, s1, 1);
-		
-//		rectangle.convertTo(rectangle, CvType.CV_8UC3);
-//		canvas = rectangle.clone();
-		
-		MatOfPoint tocrop = EdgeDetect(rotatedMat);
-		if(tocrop != null){
-			Point[] p = tocrop.toArray();
+		if(rotatedMat != null){
 			
-			Rect roi = new Rect(p[0],p[2]);
+			Rect roi = new Rect((int)p[1].x,(int)p[1].y,(int)wdth,(int) ht);
 			Mat cropped = new Mat(rotatedMat,roi);
 			
 			Bitmap croppedImg = Bitmap.createBitmap(cropped.cols(), cropped.rows(),  Bitmap.Config.ARGB_8888);               
