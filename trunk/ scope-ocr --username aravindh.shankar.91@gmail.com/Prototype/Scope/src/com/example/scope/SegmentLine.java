@@ -192,7 +192,7 @@ public class SegmentLine {
 			File file = new File(
 					Environment
 							.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-					"bg" + i + ".bmp");
+					"bg_line" + i + ".bmp");
 
 			try {
 				FileOutputStream out = new FileOutputStream(file);

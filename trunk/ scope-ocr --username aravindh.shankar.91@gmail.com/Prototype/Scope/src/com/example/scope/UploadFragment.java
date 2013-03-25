@@ -24,16 +24,19 @@ public class UploadFragment extends Fragment {
 	public final int RESULT_OK = -1;
     public static Bitmap myimage;
 	
+    
+    
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-
+		
 		// Inflate layout for upload fragment
 		View view = inflater.inflate(R.layout.uploadfragment, container, false);
 		upload_file(view);
 		//globe= getView();
 		return view;
 	}
+	
 
 	// Listening for button events
 	public void upload_file(View view) {
