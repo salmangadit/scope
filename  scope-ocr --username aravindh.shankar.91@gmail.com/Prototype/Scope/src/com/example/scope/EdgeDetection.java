@@ -146,7 +146,6 @@ public class EdgeDetection {
 		Imgproc.medianBlur(source, blurred, 9);
 		Log.v(TAG, "Median Blur Done!");
 
-        
 		Mat gray0 = new Mat(blurred.size(), blurred.type());
 		Imgproc.cvtColor(gray0, gray0, Imgproc.COLOR_RGB2GRAY);
 		Mat gray = new Mat();
@@ -158,18 +157,28 @@ public class EdgeDetection {
 		List<MatOfPoint> squares = new ArrayList<MatOfPoint>();
 		
 		// find squares in every color plane of the image
-	    for (int c = 0; c < 3; c++)
+	    for (int c = 0; c < 4; c++)
 	    {
-			Log.v(TAG, "Mix Channels Started! : " + gray0.total());
-	        int ch[] = {c, 0};
-	        MatOfInt fromto = new MatOfInt(ch);
-	        List<Mat> blurredlist = new ArrayList<Mat>();
-	        List<Mat> graylist = new ArrayList<Mat>();
-	        blurredlist.add(0, blurred);
-	        graylist.add(0, gray0);
-	        Core.mixChannels(blurredlist, graylist, fromto);
-	        gray0 = graylist.get(0);
-			Log.v(TAG, "Mix Channels Done! : " + gray0.total() );
+	    	Log.v(TAG,"Color Space Entering Iteration: " + c);
+	    	if(c==3){
+	    		Mat destImageMat = new Mat();
+	    		Imgproc.cvtColor(source, destImageMat, Imgproc.COLOR_RGB2GRAY);
+	    		destImageMat.copyTo(gray0);
+	    	}
+	    	
+	    	else{
+				Log.v(TAG, "Mix Channels Started! : " + gray0.total());
+		        int ch[] = {c, 0};
+		        MatOfInt fromto = new MatOfInt(ch);
+		        List<Mat> blurredlist = new ArrayList<Mat>();
+		        List<Mat> graylist = new ArrayList<Mat>();
+		        blurredlist.add(0, blurred);
+		        graylist.add(0, gray0);
+		        Core.mixChannels(blurredlist, graylist, fromto);
+		        gray0 = graylist.get(0);
+				Log.v(TAG, "Mix Channels Done! : " + gray0.total() );
+	    	}
+
 	     // try several threshold levels
 	        int threshold_level = 2;
 	        for (int l = 0; l < threshold_level; l++)
@@ -178,7 +187,7 @@ public class EdgeDetection {
 	            // Canny helps to catch squares with gradient shading
 	        	Log.v(TAG,"Threshold Level: " + l);
 	        	
-	            if (l >=0)
+	            if (l == 0)
 	            {
 	                Imgproc.Canny(gray0, gray, 20, 30); // 
 
@@ -188,13 +197,11 @@ public class EdgeDetection {
 	            }
 	            else
 	            {
-	                    int thresh = (l+1) * 255 / threshold_level;
-	                    Imgproc.threshold(gray0, gray, thresh, 255, Imgproc.THRESH_TOZERO);
-//	                    if(counter<3)
-//	                    {
-//	                    	gray.copyTo(test);
-//	                    	counter++;
-//	                    }
+	            	Mat final_dest_mat = Mat.zeros(source.size(), source.type());
+	        		Imgproc.adaptiveThreshold(gray0, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 5);
+	        		
+	        		final_dest_mat.copyTo(gray);
+
 	            }
 
 	    		Log.v(TAG, "Canny (or Thresholding) Done!");
@@ -228,7 +235,9 @@ public class EdgeDetection {
 	                	 if( maxcosine < 0.2 ) {
 	                		 MatOfPoint temp = new MatOfPoint();
 	                		 approx.convertTo(temp, CvType.CV_32S);
-	                         squares.add(temp);
+	                		 if((Imgproc.contourArea(approx)/src.total())<0.7){
+	                			 squares.add(temp);
+	                		 }
 	                     }
 	                }
 
