@@ -27,8 +27,6 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 	@Override
 	protected String doInBackground(Void... params) {
 		//progress.setMessage("Greyscaling image");
-
-		
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
 		Uri ppimage = grey.greyscale();
 

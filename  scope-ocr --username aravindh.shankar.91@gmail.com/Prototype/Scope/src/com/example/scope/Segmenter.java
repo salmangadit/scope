@@ -254,7 +254,7 @@ public class Segmenter {
 
 		Log.v(TAG, "Total image area: " + sourceImageArea);
 		double sourceAreaTolerance = sourceImageArea * 0.85;
-		double toleranceMin = sourceImageArea * 0.01;
+		double toleranceMin = sourceImageArea * 0.001;
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
@@ -265,7 +265,8 @@ public class Segmenter {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
-
+		Log.v(TAG,
+				"Total contours found: " + contours.size());
 		Log.v(TAG,
 				"Total text regions found: " + boundingRectangles_temp.size());
 
@@ -297,7 +298,7 @@ public class Segmenter {
 		
 		Log.v(TAG, "After removing inner rects: " + boundingRectangles.size());
 
-		int MIN_DIST_CORNERS = 20;
+		int MIN_DIST_CORNERS = 40;
 		List<List<Rect>> clusters = new ArrayList<List<Rect>>(
 				boundingRectangles.size());
 
