@@ -64,7 +64,7 @@ public class Adptrev {
 
 	//Applying Gaussian mean adaptive threshold after reversing pixel values, for dark text on light bg
 	public Uri thresh_inv() {
-		Log.v(TAG,"thresh invvvv");
+		Log.v(TAG,"Threshold invert running");
 		initiate();
 
 		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());

@@ -86,7 +86,7 @@ public class SegmentLine {
 	public List<Uri> segLine() {
 		initiate();
 
-		Log.v(TAG, "here");
+		Log.v(TAG, "Segmenting line");
 		Mat sourceImageMat = new Mat();
 		Mat filterImageMat = new Mat();
 		Mat destImageMat_temp = new Mat();
