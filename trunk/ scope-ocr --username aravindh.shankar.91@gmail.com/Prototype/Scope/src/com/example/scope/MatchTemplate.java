@@ -119,6 +119,8 @@ public class MatchTemplate {
 		int result_rows = src_copy.rows() - logoMat.rows() + 1;		
 		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
 		Log.i(TAG, "Results matrix created");
+		Log.i(TAG, "Result_cols : "+result_cols);
+		Log.i(TAG, "Result_rows : "+result_rows);
 		
 		Log.i(TAG, "Running method 1"); 
 		Boolean loop1 = runTM(Imgproc.TM_CCOEFF, grayMat, logoMat, result); 
@@ -146,7 +148,7 @@ public class MatchTemplate {
 		
 		//	    Run Template Matching function
 		Log.i(TAG, "Starting template match");
-		Imgproc.matchTemplate(grayMat, logoMat, result, process);
+		Imgproc.matchTemplate(grayMat, logoMat, result, Imgproc.TM_CCOEFF);
 		Log.i(TAG, "Template match DONE");
 		Core.normalize(result, result, 0, 1,Core.NORM_MINMAX, -1, new Mat());
 		
