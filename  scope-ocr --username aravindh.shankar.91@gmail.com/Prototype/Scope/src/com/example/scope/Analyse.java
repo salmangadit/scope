@@ -81,8 +81,9 @@ public class Analyse {
 		
 		Utils.bitmapToMat(sourceImage, sourceImageMat);
 		image.add(sourceImageMat);
-		byte data[] = new byte[(int) (sourceImageMat.total()*sourceImageMat.channels())];
-		sourceImageMat.get(0, 0, data);
+//		byte data[] = new byte[(int) (sourceImageMat.total()*sourceImageMat.channels())];
+//		sourceImageMat.get(0, 0, data);
+		
 		Imgproc.calcHist(image, channels, mask , histogram, histsize, ranges, accumulate);
 		Log.v(TAG, "Histogram: " + histogram.dump()); 
 		
@@ -393,14 +394,29 @@ public class Analyse {
 		{
 			inputImageUri = segmentedResults.get(i);
 			
+			Bitmap source = null;
+			try {
+				source = MediaStore.Images.Media.getBitmap(
+						currContext.getContentResolver(), inputImageUri);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				Log.v(TAG, "NULL");
+				e.printStackTrace();
+			}
+			file_name = "analysing"+i+".bmp"; 
+			store(source);
+			
 			if(is_light()==false)
 			{
 				Adptrev reverse = new Adptrev(currContext,inputImageUri,"bg"+i+".bmp");
+				//reverse.thresh_inv();
 				segmentedResults.set(i, reverse.thresh_inv());	
 			}	
 			else
 			{
 				Adpt adaptive = new Adpt(currContext,inputImageUri,"bg"+i+".bmp");
+				//adaptive.thresh();
 				segmentedResults.set(i, adaptive.thresh());				
 			}
 		}

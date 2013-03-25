@@ -50,6 +50,8 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		SegmentLine segmenter = new SegmentLine(
 				preprocess.getApplicationContext(), ppimage2, ppimage1);
 		List<Uri> segmentedResults = segmenter.segLine();
+		
+		Log.v(TAG, "error: "+ segmentedResults.get(0));
 
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
@@ -64,16 +66,16 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 //			segmentedResults.set(i, thresh.thresh_binary(1, 255));
 //		}
 		// Check if card is NUS card
-		MatchTemplate matcher = new MatchTemplate(uri,
-				preprocess.getApplicationContext());
-		boolean isNUS = matcher.TM();
+//		MatchTemplate matcher = new MatchTemplate(uri,
+//				preprocess.getApplicationContext());
+//		boolean isNUS = matcher.TM();
 		//boolean isNUS = true;
 
-		if (isNUS) {
-			Log.v(TAG, "This is an NUS card");
-		} else {
-			Log.v(TAG, "This is NOT an NUS card");
-		}
+//		if (isNUS) {
+//			Log.v(TAG, "This is an NUS card");
+//		} else {
+//			Log.v(TAG, "This is NOT an NUS card");
+//		}
 		// ONLY IF NUS CARD FOR NOW
 //		if (isNUS) {
 //			publishProgress("Applying cleaning for NUS card");
