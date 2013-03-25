@@ -28,13 +28,16 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 	protected String doInBackground(Void... params) {
 		//progress.setMessage("Greyscaling image");
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
-		Uri ppimage = grey.greyscale();
+		Uri ppimage1 = grey.greyscale();
 
 		// progress.setMessage("Applying bilateral filter");
 		publishProgress("Applying bilateral filter");
-		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
-				ppimage);
-		Uri ppimage1 = smoother.BilateralFilter();
+		
+     
+		
+//		Smoothing smoother = new Smoothing(preprocess.getApplicationContext(),
+//				ppimage);
+//		Uri ppimage1 = smoother.BilateralFilter();
 
 		// progress.setMessage("Applying adaptive thresholding");
 		publishProgress("Applying adaptive thresholding");
@@ -42,13 +45,13 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 				"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
 		
-//      Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
-//      Uri ppimage3 = morphing1.erode(20);		
+      Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
+      Uri ppimage3 = morphing1.erode_iterate(30, 7);	
 
 		// progress.setMessage("Applying line segmentation");
 		publishProgress("Applying line segmentation");
 		SegmentLine segmenter = new SegmentLine(
-				preprocess.getApplicationContext(), ppimage2, ppimage1);
+				preprocess.getApplicationContext(), ppimage3, ppimage1);
 		List<Uri> segmentedResults = segmenter.segLine();
 		
 		Log.v(TAG, "error: "+ segmentedResults.get(0));
