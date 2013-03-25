@@ -74,7 +74,7 @@ public class Adpt {
 		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_RGB2GRAY);
 		
 		Log.v(TAG, "Size = 1");
-		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 5, 5);
+		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 9, 9);
 		
 		Utils.matToBitmap(final_dest_mat, destImage);
 

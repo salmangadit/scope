@@ -81,7 +81,7 @@ public class MatchTemplate {
 		Log.i(TAG, "Image loaded from res folder");
 			
 		//   Initialize the input image source
-		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.nuslogo);
+		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.smallnuslogo);
 		
 		Log.i(TAG, "Changed to matrix from image!");
 		
@@ -117,10 +117,11 @@ public class MatchTemplate {
 		//   Create results matrix
 		int result_cols = src_copy.cols() - logoMat.cols() + 1;
 		int result_rows = src_copy.rows() - logoMat.rows() + 1;		
-		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
-		Log.i(TAG, "Results matrix created");
 		Log.i(TAG, "Result_cols : "+result_cols);
 		Log.i(TAG, "Result_rows : "+result_rows);
+		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
+		Log.i(TAG, "Results matrix created");
+		
 		
 		Log.i(TAG, "Running method 1"); 
 		Boolean loop1 = runTM(Imgproc.TM_CCOEFF, grayMat, logoMat, result); 

@@ -84,7 +84,6 @@ public class SegmentLine {
 	// This method segments the different parts of the card by line
 	// components
 	public List<Uri> segLine() {
-
 		initiate();
 
 		Log.v(TAG, "here");
