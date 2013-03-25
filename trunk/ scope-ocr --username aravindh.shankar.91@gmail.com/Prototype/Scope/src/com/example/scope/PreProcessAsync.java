@@ -69,10 +69,10 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 //			segmentedResults.set(i, thresh.thresh_binary(1, 255));
 //		}
 		// Check if card is NUS card
-//		MatchTemplate matcher = new MatchTemplate(uri,
-//				preprocess.getApplicationContext());
-//		boolean isNUS = matcher.TM();
-		boolean isNUS = true;
+		MatchTemplate matcher = new MatchTemplate(uri,
+				preprocess.getApplicationContext());
+		boolean isNUS = matcher.TM();
+		//boolean isNUS = true;
 
 		if (isNUS) {
 			Log.v(TAG, "This is an NUS card");
