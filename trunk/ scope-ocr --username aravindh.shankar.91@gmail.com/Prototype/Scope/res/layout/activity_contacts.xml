@@ -118,5 +118,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/btn_add"
         android:text="@string/str_btn_contacts" />
+    
+    <Button
+        android:id="@+id/btn_home"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_contacts"
+        android:text="Done" />
 
 </LinearLayout>

@@ -13,6 +13,7 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.RawContacts;
+import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.view.Menu;
@@ -46,24 +47,24 @@ public class Contacts extends Activity {
 		etEmail = (EditText) findViewById(R.id.et_home_email);
 		etAddress = (EditText) findViewById(R.id.et_work_email);
 		etWebsite = (EditText) findViewById(R.id.et_website);
-		
+
 		Globals appState = ((Globals) getApplicationContext());
 		ocrResults = appState.getSegmentationResult();
-		
+
 		ArrayList<String> extractedStrings = this.extractStrings(ocrResults);
-		
+
 		StringParser parser = new StringParser();
 		ParsedResults results = new ParsedResults();
 		results = parser.CardParse(extractedStrings);
-		
-		//Update fields
+
+		// Update fields
 		etName.setText(results.name);
 		etMobile.setText(results.numbers);
 		etEmail.setText(results.emails);
 		etFax.setText(results.fax);
 		etAddress.setText(results.address);
 		etWebsite.setText(results.website);
-		
+
 		// Creating a button click listener for the "Add Contact" button
 		OnClickListener addClickListener = new OnClickListener() {
 
@@ -118,8 +119,7 @@ public class Contacts extends Activity {
 								rawContactID)
 						.withValue(ContactsContract.Data.MIMETYPE,
 								Phone.CONTENT_ITEM_TYPE)
-						.withValue(Phone.NUMBER,
-								etFax.getText().toString())
+						.withValue(Phone.NUMBER, etFax.getText().toString())
 						.withValue(Phone.TYPE, Phone.TYPE_FAX_HOME).build());
 
 				// Adding insert operation to operations list
@@ -131,8 +131,7 @@ public class Contacts extends Activity {
 								rawContactID)
 						.withValue(ContactsContract.Data.MIMETYPE,
 								Email.CONTENT_ITEM_TYPE)
-						.withValue(Email.ADDRESS,
-								etEmail.getText().toString())
+						.withValue(Email.ADDRESS, etEmail.getText().toString())
 						.withValue(Email.TYPE, Email.TYPE_HOME).build());
 
 				// Adding insert operation to operations list
@@ -142,13 +141,17 @@ public class Contacts extends Activity {
 						.withValueBackReference(
 								ContactsContract.Data.RAW_CONTACT_ID,
 								rawContactID)
-						.withValue(ContactsContract.Data.MIMETYPE,
+						.withValue(
+								ContactsContract.Data.MIMETYPE,
 								CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
-						.withValue(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS,
+						.withValue(
+								CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS,
 								etAddress.getText().toString())
-						.withValue(CommonDataKinds.StructuredPostal.TYPE, CommonDataKinds.StructuredPostal.TYPE_WORK).build());
-				
-				//Website
+						.withValue(CommonDataKinds.StructuredPostal.TYPE,
+								CommonDataKinds.StructuredPostal.TYPE_WORK)
+						.build());
+
+				// Website
 				ops.add(ContentProviderOperation
 						.newInsert(ContactsContract.Data.CONTENT_URI)
 						.withValueBackReference(
@@ -158,7 +161,8 @@ public class Contacts extends Activity {
 								CommonDataKinds.Website.CONTENT_ITEM_TYPE)
 						.withValue(CommonDataKinds.Website.URL,
 								etWebsite.getText().toString())
-						.withValue(CommonDataKinds.Website.TYPE, CommonDataKinds.Website.TYPE_WORK).build());
+						.withValue(CommonDataKinds.Website.TYPE,
+								CommonDataKinds.Website.TYPE_WORK).build());
 
 				try {
 					// Executing all the insert operations as a single database
@@ -189,18 +193,34 @@ public class Contacts extends Activity {
 				startActivity(contacts);
 			}
 		};
+		
+		final Context a = this.getApplicationContext();
+		// Creating a button click listener for the "Add Contact" button
+		OnClickListener doneClickListener = new OnClickListener() {
 
+			@Override
+			public void onClick(View v) {
+				// Creating an intent to open Android's Contacts List
+				 Intent intent = new Intent(a, MainActivity.class);
+				 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				 startActivity(intent);
+			}
+		};
 		// Getting reference to "Add Contact" button
 		Button btnAdd = (Button) findViewById(R.id.btn_add);
 
 		// Getting reference to "Contacts List" button
 		Button btnContacts = (Button) findViewById(R.id.btn_contacts);
 
+		Button btnDone = (Button) findViewById(R.id.btn_home);
+
 		// Setting click listener for the "Add Contact" button
 		btnAdd.setOnClickListener(addClickListener);
 
 		// Setting click listener for the "List Contacts" button
 		btnContacts.setOnClickListener(contactsClickListener);
+		
+		btnDone.setOnClickListener(doneClickListener);
 	}
 
 	@Override
@@ -216,7 +236,7 @@ public class Contacts extends Activity {
 			if (ocr.get(i).Result.trim() != "")
 				extracted.add(ocr.get(i).Result);
 		}
-		
+
 		return extracted;
 	}
 
