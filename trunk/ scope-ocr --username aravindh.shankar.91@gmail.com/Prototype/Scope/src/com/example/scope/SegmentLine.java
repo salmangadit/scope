@@ -107,8 +107,8 @@ public class SegmentLine {
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
 
 		Core.rectangle(sourceImageMat, new Point(0, 0), new Point(
-				sourceImageMat.width(), sourceImageMat.height()), new Scalar(0,
-				0, 0), 10, 8, 0);
+				sourceImageMat.width(), sourceImageMat.height()), new Scalar(
+				255, 0, 0), 25, 8, 0);
 
 		Imgproc.cvtColor(sourceImageMat, destImageMat_temp,
 				Imgproc.COLOR_BGR2GRAY, 0);
@@ -127,7 +127,7 @@ public class SegmentLine {
 		// Check tolerance area for large rectangles
 		int sourceImageArea = sourceImageMat.width() * sourceImageMat.height();
 		double sourceAreaTolerance = sourceImageArea * 0.9;
-		double sourceAreaMinTolerance = sourceImageArea * 0.05;
+		double sourceAreaMinTolerance = sourceImageArea * 0.01;
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
@@ -207,7 +207,7 @@ public class SegmentLine {
 		}
 		
 		if (segmentedResults.size() == 0){
-			segmentedResults.add(inputImageUri);
+			segmentedResults.add(filterImageUri);
 		}
 		
 		return segmentedResults;
