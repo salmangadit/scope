@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -66,15 +67,81 @@ public class Morphing {
 	{
 		inputImageUri = inputUri;
 	}
+
+	//Erode iterate
+public Uri erode_iterate(double matrixPercentage, int numbers) {
+
+		matrix_size = matrixPercentage/10;
+		
+		Mat sourceImageMat = new Mat();
+		
+		Bitmap sourceImage = null;
+		Bitmap destImage = null;
+
+		try {
+			sourceImage = MediaStore.Images.Media.getBitmap(
+					currContext.getContentResolver(), inputImageUri);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.v(TAG, "NULL");
+			e.printStackTrace();
+		}
+
+		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
+		
+		destImage=sourceImage;
+		
+		Utils.bitmapToMat(sourceImage, sourceImageMat);
+		Mat destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
+		
+		if(matrix_size>=0)
+		{	Log.v(TAG, "size: "+matrix_size);
+			Size size = new Size(matrix_size,matrix_size);
+			Point anchor = new Point(-1,-1);
+			Imgproc.erode(sourceImageMat, destImageMat, Mat.ones(size,0), anchor, numbers);
+			//Imgproc.erode( sourceImageMat, destImageMat, Mat.ones(size,0));	
+		}
+		else
+		{
+			Log.v(TAG,"Dilate: "+ (-matrix_size));
+			Size size = new Size(-matrix_size,-matrix_size);
+			Imgproc.dilate( sourceImageMat, destImageMat, Mat.ones(size,0));	
+		}
+			
+		Utils.matToBitmap(destImageMat, destImage);
+		
+		Log.v(TAG, "destImage Size: " + destImage.getByteCount());
+		
+		File file = new File(
+				Environment
+						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+				"temp_morph.bmp");
+
+		try {
+			FileOutputStream out = new FileOutputStream(file);
+			destImage.compress(Bitmap.CompressFormat.PNG, 90, out);
+		} catch (Exception e) {
+			Log.v(TAG, "null2");
+			e.printStackTrace();
+		}
+
+		final Uri uri = Uri.fromFile(file);
+		Log.v(TAG, uri.toString());
+		
+		return uri;
+	}
+	
+	
 	
 	// Input value for morphing as a percentage
 	public Uri erode(double matrixPercentage) {
 		
 		
-		if (matrixPercentage > 100)
-			matrixPercentage = 100;
-		else if (matrixPercentage < -100)
-			matrixPercentage = -100;
+//		if (matrixPercentage > 100)
+//			matrixPercentage = 100;
+//		else if (matrixPercentage < -100)
+//			matrixPercentage = -100;
 		
 		matrix_size = matrixPercentage/10;
 		
