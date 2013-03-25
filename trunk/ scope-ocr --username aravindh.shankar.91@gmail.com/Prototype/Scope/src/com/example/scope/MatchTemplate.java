@@ -90,6 +90,7 @@ public class MatchTemplate {
 		int t_rows = template.getHeight();
 		int t_cols = template.getWidth();
 		
+		
 		Mat sourceMat = new Mat(s_rows,s_cols,CvType.CV_32F); //NUS card image matrix in 32F depth
 		Mat src_copy = new Mat (s_rows,s_cols, CvType.CV_32F);
 		
@@ -119,9 +120,33 @@ public class MatchTemplate {
 		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
 		Log.i(TAG, "Results matrix created");
 		
+		Log.i(TAG, "Running method 1"); 
+		Boolean loop1 = runTM(Imgproc.TM_CCOEFF, grayMat, logoMat, result); 
+		Log.i(TAG, "Running method 2");
+		Boolean loop2 = runTM(Imgproc.TM_CCOEFF_NORMED, grayMat, logoMat, result); 
+		Log.i(TAG, "Running method 3");
+		Boolean loop3 = runTM(Imgproc.TM_CCORR, grayMat, logoMat, result);  
+		Log.i(TAG, "Running method 4");
+		Boolean loop4 = runTM(Imgproc.TM_CCORR_NORMED, grayMat, logoMat, result); 
+		Log.i(TAG, "Running method 5");
+		Boolean loop5 = runTM(Imgproc.TM_SQDIFF, grayMat, logoMat, result); 
+		Log.i(TAG, "Running method 6");
+		Boolean loop6 = runTM(Imgproc.TM_SQDIFF_NORMED, grayMat, logoMat, result);
+		
+		//  Create variable to determine a match or not. 
+		//   This is a bool value where TRUE=match &  FALSE=not a match
+		Boolean confirm = loop1|loop2|loop3|loop4|loop5|loop6;  Log.i(TAG, "Final confirmation of template Matching.." +confirm);  
+		return confirm;
+		
+	}
+		
+	public Boolean runTM(int process, Mat grayMat, Mat logoMat, Mat result) 
+	{
+	
+		
 		//	    Run Template Matching function
 		Log.i(TAG, "Starting template match");
-		Imgproc.matchTemplate(grayMat, logoMat, result, Imgproc.TM_CCOEFF_NORMED);
+		Imgproc.matchTemplate(grayMat, logoMat, result, process);
 		Log.i(TAG, "Template match DONE");
 		Core.normalize(result, result, 0, 1,Core.NORM_MINMAX, -1, new Mat());
 		
@@ -151,24 +176,23 @@ public class MatchTemplate {
 		Point origin = new Point(950,65);
 		Point test_end = new Point(1550,325);
 		
-		//   Create variable to determine a match or not. 
-		//   This is a bool value where TRUE=match &  FALSE=not a match
-		boolean confirm;		
-		
-		//This function checks whether the coordinates of the template and the identified area match.
-		//If so, a String output is shown on the screen
+		//  Create variable to determine a match or not. 
+		//  This is a bool value where TRUE=match &  FALSE=not a match
+		Boolean loop;
+			
+		//   This function checks whether the coordinates of the template and the identified area match.
+		//   If so, a String output is shown on the screen
 		if((Math.abs(origin.x - matchLoc.x)<= 300) && (Math.abs(origin.y - matchLoc.y)<= 300) && (Math.abs(test_end.x - rect_end.x)<= 300) && (Math.abs(test_end.y - rect_end.y)<= 300))
 			{
-				confirm=true;
-				Log.i(TAG,"Templates match! This is absolutely an NUS card! "+confirm);
+				loop=true;
+				Log.i(TAG,"Templates match! This is an NUS card! "+loop);
 			}
 		else
 			{
-				confirm=false;
-				Log.i(TAG,"Templates don't quite match."+confirm);
+				loop=false;
+				Log.i(TAG,"It's not quite a match."+loop);
 			}
-		return confirm;
+		
+		return loop;
 	}
-	
-	
 }
