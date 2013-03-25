@@ -74,7 +74,7 @@ public class Smoothing {
 	 */
 	public Uri HomogeneousFilter() {
 		Log.v(TAG, "null2");
-		for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2) {
+		for (int i = 1; i < 4; i = i + 2) {
 			Imgproc.blur(src, dst, new Size(i, i), new Point(-1, -1));
 		}
 
@@ -91,7 +91,7 @@ public class Smoothing {
 	 */
 	public Uri GaussianFilter() {
 		Log.v(TAG, "null2");
-		for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2) {
+		for (int i = 1; i < 5; i = i + 2) {
 			Imgproc.GaussianBlur(src, dst, new Size(i, i), 0, 0);
 		}
 
@@ -107,7 +107,7 @@ public class Smoothing {
 	 */
 	public Uri MedianFilter() {
 		Log.v(TAG, "null2");
-		for (int i = 1; i < MAX_KERNEL_LENGTH; i = i + 2) {
+		for (int i = 1; i < 4; i = i + 2) {
 			Imgproc.medianBlur(src, dst, i);
 		}
 

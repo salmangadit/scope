@@ -27,7 +27,7 @@ public class Splashscreen extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splashscreen);
-		
+		//Log.v(TAG, "splash screen");
 		new AsyncTask<Void, Void, Void> (){
 			@Override
 			protected void onPreExecute() {
