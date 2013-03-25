@@ -26,19 +26,9 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 
 	@Override
 	protected String doInBackground(Void... params) {
-		progress.setMessage("Greyscaling image");
+		//progress.setMessage("Greyscaling image");
 
-		// Check if card is NUS card
-//		MatchTemplate matcher = new MatchTemplate(uri,
-//				preprocess.getApplicationContext());
-		boolean isNUS = false;
-
-		if (isNUS){
-			Log.v(TAG, "This is an NUS card");
-		}
-		else{
-			Log.v(TAG, "This is NOT an NUS card");
-		}
+		
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
 		Uri ppimage = grey.greyscale();
 
@@ -71,25 +61,34 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		segmentedResults = analyser.adaptiveSplitter();
 
 		publishProgress("Cleaning segments");
-		// Cleaner function
+//		// Cleaner function
 //		for (int i = 0; i < segmentedResults.size(); i++) {
 //			Threshold thresh = new Threshold(
 //					preprocess.getApplicationContext(),
 //					segmentedResults.get(i), "clean" + i + ".bmp");
-//			segmentedResults.set(i, thresh.thresh_binary(10, 255));
+//			segmentedResults.set(i, thresh.thresh_binary(1, 255));
+//		}
+		// Check if card is NUS card
+//		MatchTemplate matcher = new MatchTemplate(uri,
+//				preprocess.getApplicationContext());
+//		boolean isNUS = matcher.TM();
+		boolean isNUS = true;
+
+		if (isNUS) {
+			Log.v(TAG, "This is an NUS card");
+		} else {
+			Log.v(TAG, "This is NOT an NUS card");
+		}
+		// ONLY IF NUS CARD FOR NOW
+//		if (isNUS) {
+//			publishProgress("Applying cleaning for NUS card");
+//			for (int i = 0; i < segmentedResults.size(); i++) {
+//				Analyse fill = new Analyse(preprocess.getApplicationContext(),
+//						segmentedResults.get(i), "temple" + i + ".bmp");
+//				segmentedResults.set(i, fill.filler());
+//			}
 //		}
 
-		
-		// ONLY IF NUS CARD FOR NOW
-		if (isNUS) {
-			publishProgress("Applying cleaning for NUS card");
-			for (int i = 0; i < segmentedResults.size(); i++) {
-				Analyse fill = new Analyse(preprocess.getApplicationContext(),
-						segmentedResults.get(i), "temple" + i + ".bmp");
-				segmentedResults.set(i, fill.filler());
-			}
-		}
-		
 		Globals appState = ((Globals) preprocess.getApplicationContext());
 		appState.setAdaptiveResult(segmentedResults);
 

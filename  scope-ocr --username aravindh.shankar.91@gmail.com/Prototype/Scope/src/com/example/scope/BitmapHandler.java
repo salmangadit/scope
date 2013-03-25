@@ -48,7 +48,8 @@ public class BitmapHandler {
 			// Decode image size
 			BitmapFactory.Options o = new BitmapFactory.Options();
 			o.inJustDecodeBounds = true;
-
+			o.inScaled = false;
+			
 			FileInputStream fis = new FileInputStream(f);
 			BitmapFactory.decodeStream(fis, null, o);
 			fis.close();
@@ -66,6 +67,7 @@ public class BitmapHandler {
 			Log.v(TAG, "Final scale: " + scale);
 			// Decode with inSampleSize
 			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inScaled = false;
 			o2.inSampleSize = scale;
 			fis = new FileInputStream(f);
 			b = BitmapFactory.decodeStream(fis, null, o2);
