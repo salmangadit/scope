@@ -53,6 +53,12 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		Adpt initadpt = new Adpt(preprocess.getApplicationContext(), ppimage1,
 				"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
+		
+//        Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
+//      Uri ppimage3 = morphing1.erode(20);
+		
+
+		
 
 		// progress.setMessage("Applying line segmentation");
 		publishProgress("Applying line segmentation");
@@ -66,12 +72,12 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 
 		publishProgress("Cleaning segments");
 		// Cleaner function
-		for (int i = 0; i < segmentedResults.size(); i++) {
-			Threshold thresh = new Threshold(
-					preprocess.getApplicationContext(),
-					segmentedResults.get(i), "clean" + i + ".bmp");
-			segmentedResults.set(i, thresh.thresh_binary(1, 255));
-		}
+//		for (int i = 0; i < segmentedResults.size(); i++) {
+//			Threshold thresh = new Threshold(
+//					preprocess.getApplicationContext(),
+//					segmentedResults.get(i), "clean" + i + ".bmp");
+//			segmentedResults.set(i, thresh.thresh_binary(10, 255));
+//		}
 
 		
 		// ONLY IF NUS CARD FOR NOW
