@@ -396,12 +396,12 @@ public class Analyse {
 			if(is_light()==false)
 			{
 				Adptrev reverse = new Adptrev(currContext,inputImageUri,"bg"+i+".bmp");
-				reverse.thresh_inv();
+				segmentedResults.set(i, reverse.thresh_inv());	
 			}	
 			else
 			{
 				Adpt adaptive = new Adpt(currContext,inputImageUri,"bg"+i+".bmp");
-				adaptive.thresh();
+				segmentedResults.set(i, adaptive.thresh());				
 			}
 		}
 		return segmentedResults;

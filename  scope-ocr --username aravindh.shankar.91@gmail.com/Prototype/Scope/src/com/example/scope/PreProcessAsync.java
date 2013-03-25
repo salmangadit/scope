@@ -44,11 +44,8 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 				"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
 		
-//        Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
-//      Uri ppimage3 = morphing1.erode(20);
-		
-
-		
+//      Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
+//      Uri ppimage3 = morphing1.erode(20);		
 
 		// progress.setMessage("Applying line segmentation");
 		publishProgress("Applying line segmentation");
@@ -58,7 +55,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
-		segmentedResults = analyser.adaptiveSplitter();
+		List <Uri> segmentedResults_final = analyser.adaptiveSplitter();
 
 		publishProgress("Cleaning segments");
 //		// Cleaner function
@@ -90,7 +87,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 //		}
 
 		Globals appState = ((Globals) preprocess.getApplicationContext());
-		appState.setAdaptiveResult(segmentedResults);
+		appState.setAdaptiveResult(segmentedResults_final);
 
 		// progress.setMessage("Pre-processing complete.");
 		publishProgress("Pre-processing complete.");
