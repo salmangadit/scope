@@ -27,7 +27,7 @@ public class BitmapHandler {
 		int width = size.x;
 		int height = size.y;
 		Log.v(TAG, "Screen width: " + width + " height: " + height);
-		IMAGE_MAX_SIZE = (Math.min(width, height)*2);
+		IMAGE_MAX_SIZE = (Math.min(width, height)*4);
 	}
 
 	public Bitmap decodeFileAsPath(String uri) {
