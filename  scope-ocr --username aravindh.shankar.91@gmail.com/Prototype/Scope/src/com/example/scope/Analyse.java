@@ -26,7 +26,7 @@ public class Analyse {
 	private static final String TAG = "Scope.java";
 	Uri inputImageUri;
 	Context currContext;
-	private int BINS = 32;
+	private int BINS = 64;
 	Uri uri;
 	List<Uri> segmentedResults;
 	String file_name = "temple.bmp";
@@ -88,14 +88,16 @@ public class Analyse {
 		Log.v(TAG, "Histogram: " + histogram.dump()); 
 		
 		double low = 0,high = 0;
-		for(int i=0;i<32;i++)
-		{
-			if(i<16)
+		for(int i=0;i<64;i++)
+		{	
+			if(i<=35)
 				low+=histogram.get(i,0)[0];
 			else
 				high+=histogram.get(i,0)[0];
+			
 		}
-		Log.v(TAG," " + high + " "+ low);
+		Log.v(TAG,"middle" + (histogram.get(32,0)[0]) );
+		Log.v(TAG," " + low + " "+ high);
 		
 		if(high>low)
 			return true;
@@ -133,7 +135,8 @@ public class Analyse {
 		for(int i =0; i < sourceImage.getWidth() ;i++)
 			for(int j=0; j < sourceImage.getHeight();j++)
 			{
-				count1++;
+			//Log.v(TAG, "a : " + i + "," +j);	
+			count1++;
 			abc = sourceImage.getPixel(i, j); 
 			red = Color.red(abc);
 			green = Color.green(abc);
