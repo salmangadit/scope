@@ -26,7 +26,7 @@ public class Adptrev {
 	Mat sourceImageMat = new Mat();
 	Bitmap sourceImage = null;
 	Bitmap destImage = null;
-	double MID = 128;
+	double MID = 140;
 	String file_name = "temp.bmp";
 	Uri uri;
 
@@ -81,12 +81,13 @@ public class Adptrev {
 		//Reversing pixel intensities about the mean 128
 		for(int i =0;i <destImageMat.rows();i++)
 			for(int j=0; j <destImageMat.cols();j++)
-			{
+			{	
+				
 			   double diff = MID - destImageMat.get(i, j)[0];
 			   if (diff>0)
-				   destImageMat.put(i, j,255);
+				   destImageMat.put(i, j,MID + diff + 30);
 			   else
-				   destImageMat.put(i, j,0);
+				   destImageMat.put(i, j,MID - diff - 30);
 			}
 		
 		Utils.matToBitmap(destImageMat, destImage);

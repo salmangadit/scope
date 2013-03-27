@@ -90,7 +90,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		publishProgress("Cleaning segments");
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
-		List <Uri> segmentedResults_final = analyser.adaptiveSplitter();
+		List <Uri> segmentedResults_analysed = analyser.adaptiveSplitter();
 		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
@@ -98,6 +98,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		now = new Date();
 		
 		publishProgress("Cleaning segments");
+		
 //		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
 //		Analyse fill = new Analyse(preprocess.getApplicationContext(),
 //				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
