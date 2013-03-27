@@ -200,8 +200,20 @@ public class EdgeDetection {
 	            	Mat final_dest_mat = Mat.zeros(source.size(), source.type());
 	        		Imgproc.adaptiveThreshold(gray0, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 5);
 	        		
-	        		final_dest_mat.copyTo(gray);
-
+	        		if(c == 0){
+	    	    		int matrix_size = 2;
+	    	    		Size size = new Size(matrix_size,matrix_size);
+	    	    		
+	    	    		Mat temp_erode_1 = Mat.zeros(final_dest_mat.size(), final_dest_mat.type());
+	    				Imgproc.erode( final_dest_mat, temp_erode_1, Mat.ones(size,0));
+	    				Mat temp_erode_2 = Mat.zeros(temp_erode_1.size(), temp_erode_1.type());
+	    				Imgproc.erode( temp_erode_1, temp_erode_2, Mat.ones(size,0));
+	    				
+	    				temp_erode_2.copyTo(gray);
+	        		}
+	        		else{
+	        			final_dest_mat.copyTo(gray);
+	        		}
 	            }
 
 	    		Log.v(TAG, "Canny (or Thresholding) Done!");
@@ -225,24 +237,35 @@ public class EdgeDetection {
 	                	Log.v(TAG,"Passes Conditions! " + approx.size().toString());
 	                	double maxcosine = 0;
 	                	Point[] list = approx.toArray();
-	                	
+	                	int rectangle_flag = 0;
+	                	double temp_cosine = 0;
 	                	 for (int j = 2; j < 5; j++)
-	                	 {
+	                	 {	 
 	                		 double cosine =Math.abs(angle(list[j%4], list[j-2], list[j-1]));
+	                		 if(j == 2){
+	                			 temp_cosine = cosine;
+	                		 }
+	                		 else{
+	                			 if((cosine > (temp_cosine + 0.05))||(cosine < (temp_cosine - 0.05))){
+	                				 rectangle_flag = 1;
+	                			 }
+	                		 }
+	                		 Log.v(TAG,"Cosine of side " + j + " = " + cosine);
 	                		 maxcosine = Math.max(maxcosine, cosine);
                          }
 	                	 
 	                	 if( maxcosine < 0.2 ) {
 	                		 MatOfPoint temp = new MatOfPoint();
 	                		 approx.convertTo(temp, CvType.CV_32S);
-	                		 if((Imgproc.contourArea(approx)/src.total())<0.7){
-	                			 squares.add(temp);
+	                		 if((Imgproc.contourArea(approx)/src.total())<0.85){
+	                			 if(rectangle_flag == 0){
+		                			 squares.add(temp);
+		             	    		Log.v(TAG, "Squares Added to List! : " + squares.size());
+		                		 }
 	                		 }
 	                     }
 	                }
-
 	            }
-	    		Log.v(TAG, "Squares Added to List! : " + squares.size());
 	        }
 	    }
 	    
@@ -305,85 +328,100 @@ public class EdgeDetection {
 	public Uri AutoRotation()
 	{	
 		MatOfPoint edges = EdgeDetect(src);
+		int is_negative = 0;
 		if(edges!=null)
 		{
-		MatOfPoint2f forrotatedrect = new MatOfPoint2f();
-		edges.convertTo(forrotatedrect, CvType.CV_32FC2);
-		RotatedRect rotated = Imgproc.minAreaRect(forrotatedrect);
-		
-		Log.v(TAG,"Rotated Rect Received" + rotated.angle);
-		Log.v(TAG,"Rotated Rect: " + rotated.center.x + rotated.center.y);
-		double angle = rotated.angle;
-		Size size = rotated.size;
-		
-		Point[] corners = new Point[4];
-		rotated.points(corners);
-		Log.v(TAG,"Corner Top Left: "+ corners[2].x + " " + corners[2].y);
-		
-		if(angle<-45.0)
-		{
-			angle = angle + 90.0;
-			double temp = size.width;
-			size.width = size.height;
-			size.height = temp;
-		}	
-		
-		if(size.width < size.height){
-			if(corners[1].y < corners[3].y){
-				angle = angle + 90;
+			MatOfPoint2f forrotatedrect = new MatOfPoint2f();
+			edges.convertTo(forrotatedrect, CvType.CV_32FC2);
+			RotatedRect rotated = Imgproc.minAreaRect(forrotatedrect);
+			
+			Log.v(TAG,"Rotated Rect Received" + rotated.angle);
+			Log.v(TAG,"Rotated Rect: " + rotated.center.x + rotated.center.y);
+			double angle = rotated.angle;
+			Size size = rotated.size;
+			
+			Point[] corners = new Point[4];
+			rotated.points(corners);
+			Log.v(TAG,"Corner Top Left: "+ corners[2].x + " " + corners[2].y);
+			for(int j = 0; j<4; ++j){
+				if(corners[j].x < 0 || corners[j].y < 0){
+					is_negative = 1;
+				}
 			}
-			else{
-				angle = angle - 90;
-			}
-			double temp = size.width;
-			size.width = size.height;
-			size.height = temp;
+			
+			if(is_negative == 0){
+				if(angle<-45.0)
+				{
+					angle = angle + 90.0;
+					double temp = size.width;
+					size.width = size.height;
+					size.height = temp;
+				}	
+				
+				if(size.width < size.height){
+					if(corners[1].y < corners[3].y){
+						angle = angle + 90;
+					}
+					else{
+						angle = angle - 90;
+					}
+					double temp = size.width;
+					size.width = size.height;
+					size.height = temp;
+				}
+				
+				Log.v(TAG,"Final Angle Desired: " + angle);
+				
+				Mat transform = Imgproc.getRotationMatrix2D(rotated.center, angle, 1.0);
+				Mat rotatedMat = new Mat(src.size(),src.type());
+				
+				Log.v(TAG,"Size" + size.width + size.height);
+				
+				Imgproc.warpAffine(src, rotatedMat, transform, src.size(),Imgproc.INTER_CUBIC);
+				
+				Log.v(TAG,"RotatedMat found " + rotatedMat.total());
+				
+				rotatedMat.convertTo(rotatedMat, 0);
+				
+				
+				Log.v(TAG,"Size of patch: " + size.height + " " + size.width);
+				Log.v(TAG,"Center of patch: "+ rotated.center.x + " " + rotated.center.y);
+			
+				
+				double ht = size.height;
+				double wdth = size.width;
+				Point centre_point = rotated.center;
+				Point[] p = new Point[4];
+				p[0] = new Point(centre_point.x - (wdth/2), centre_point.y + (ht/2));
+				p[1] = new Point(centre_point.x - (wdth/2), centre_point.y - (ht/2));
+				p[2] = new Point(centre_point.x + (wdth/2), centre_point.y - (ht/2));
+				p[3] = new Point(centre_point.x + (wdth/2), centre_point.y + (ht/2));
+				
+				if(rotatedMat != null){
+					
+					Rect roi = new Rect((int)p[1].x,(int)p[1].y,(int)wdth,(int) ht);
+					Mat cropped = new Mat(rotatedMat,roi);
+					
+					Bitmap croppedImg = Bitmap.createBitmap(cropped.cols(), cropped.rows(),  Bitmap.Config.ARGB_8888);               
+					Utils.matToBitmap(cropped, croppedImg);
+					
+					//Utils.matToBitmap(canvas, destImage);
+					Log.v(TAG, "Mat to Bitmap Successful");
+					Log.v(TAG, getBitmapUri(croppedImg).toString());
+					return getBitmapUri(croppedImg);
+					}
+				}
 		}
 		
-		Log.v(TAG,"Final Angle Desired: " + angle);
-		
-		Mat transform = Imgproc.getRotationMatrix2D(rotated.center, angle, 1.0);
-		Mat rotatedMat = new Mat(src.size(),src.type());
-		
-		Log.v(TAG,"Size" + size.width + size.height);
-		
-		Imgproc.warpAffine(src, rotatedMat, transform, src.size(),Imgproc.INTER_CUBIC);
-		
-		Log.v(TAG,"RotatedMat found " + rotatedMat.total());
-		
-		rotatedMat.convertTo(rotatedMat, 0);
-		
-		
-		Log.v(TAG,"Size of patch: " + size.height + " " + size.width);
-		Log.v(TAG,"Center of patch: "+ rotated.center.x + " " + rotated.center.y);
-	
-		
-		double ht = size.height;
-		double wdth = size.width;
-		Point centre_point = rotated.center;
-		Point[] p = new Point[4];
-		p[0] = new Point(centre_point.x - (wdth/2), centre_point.y + (ht/2));
-		p[1] = new Point(centre_point.x - (wdth/2), centre_point.y - (ht/2));
-		p[2] = new Point(centre_point.x + (wdth/2), centre_point.y - (ht/2));
-		p[3] = new Point(centre_point.x + (wdth/2), centre_point.y + (ht/2));
-		
-		if(rotatedMat != null){
-			
-			Rect roi = new Rect((int)p[1].x,(int)p[1].y,(int)wdth,(int) ht);
-			Mat cropped = new Mat(rotatedMat,roi);
-			
-			Bitmap croppedImg = Bitmap.createBitmap(cropped.cols(), cropped.rows(),  Bitmap.Config.ARGB_8888);               
-			Utils.matToBitmap(cropped, croppedImg);
-			
-			//Utils.matToBitmap(canvas, destImage);
-			Log.v(TAG, "Mat to Bitmap Successful");
-			Log.v(TAG, getBitmapUri(croppedImg).toString());
-			return getBitmapUri(croppedImg);
-			}
-		}
 
 		Utils.matToBitmap(src, destImage);
-		Log.v(TAG,"No edges found, showing original image!");
+		if(edges == null){
+			Log.v(TAG,"No edges found, showing original image!");
+		}
+		if(is_negative == 1){
+			Log.v(TAG,"Negative corners found, showing original image");
+		}
+
 		Log.v(TAG, getBitmapUri(destImage).toString());
 		return getBitmapUri(destImage);		
 		
