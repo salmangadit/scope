@@ -126,9 +126,10 @@ public class Analyse {
 		}
 		Bitmap dest = Bitmap.createBitmap(sourceImage.getWidth(),
 				sourceImage.getHeight(), Bitmap.Config.ARGB_8888);
-		Log.v(TAG, "size " +sourceImage.getByteCount());
+		Log.v(TAG, "analyse filler " +sourceImage.getByteCount());
 		int abc, red , green, blue,count1=0 ;
 		color[][] map = new color[sourceImage.getWidth()][sourceImage.getHeight()];
+		Log.v(TAG, "Disintegrating image");
 		for(int i =0; i < sourceImage.getWidth() ;i++)
 			for(int j=0; j < sourceImage.getHeight();j++)
 			{
@@ -141,73 +142,149 @@ public class Analyse {
 			}
 		int count = 0,start, end,flag, counter1=0,yay=0, counter2=0;
 		
-		//************Vertical pass
-			for(int i =0; i < sourceImage.getWidth() ;i++)
-				for(int j=0; j < sourceImage.getHeight();j++)
-			{
-				if ( (i!=0)&&(i<= sourceImage.getWidth() -3) &&(j!=0)&&(j<= sourceImage.getHeight() -3))
+		Log.v(TAG,"Single dot pass");
+		//************Single dot pass
+				for(int i =0; i < sourceImage.getWidth() ;i++)
+					for(int j=0; j < sourceImage.getHeight();j++)
 				{
-					if(map[i][j].R ==0 && map[i][j+1].R==255 && map[i+1][j+1].R==0 )
+					if ( (i>=10)&&(i<= sourceImage.getWidth() -10) &&(j>=10)&&(j<= sourceImage.getHeight() -10))
 					{
-						start = j;end=j;flag = 1;
-						while(map[i][j+1+flag].R==255 && map[i+1][j+1+flag].R==0)
-						{
-							flag++;
-							end = j+1+flag;
-						}
-						if(map[i][j+1+flag].R==0 && map[i+1][j+1+flag].R==0)
+						if(map[i-1][j-1].R==255 && map[i][j-1].R==255 && map[i+1][j-1].R==255 &&   
+						   map[i-1][j+1].R==255 && map[i][j+1].R==255 && map[i+1][j+1].R==255 && 
+						   map[i-1][j].R==255 && map[i+1][j].R==255 && 
+						   map[i][j].R==0)
 						{	
-							for (int k =start; k<=end;k++)
-							{	
-								dest.setPixel(i, k, Color.rgb(0 , 0, 0));
-								counter1 =1;
-							}
-							if(counter1==1)
-								{j+=(end-start);flag=0;}
+							dest.setPixel(i, j, Color.rgb(255 , 255, 255));
 						}
 						else
-							dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+							dest.setPixel(i, j,Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B) );
 					}
 					else
-						dest.setPixel(i, j,Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B) );
+					{	
+						dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+					}
+				}
+				
+				Log.v(TAG,"Vertical pass");
+		
+		//************Vertical pass
+		for(int i =0; i < sourceImage.getWidth() ;i++)
+			for(int j=0; j < sourceImage.getHeight();j++)
+		{
+			if ( (i>=10)&&(i<= sourceImage.getWidth() -10) &&(j>=10)&&(j<= sourceImage.getHeight() -10))
+			{
+				if(map[i-1][j-1].R==255 && map[i][j-1].R==255 && map[i+1][j-1].R==255 && map[i+2][j-1].R==255 &&   
+				   map[i-1][j+1].R==255 && map[i][j+1].R==255 && map[i+1][j+1].R==255 && map[i+2][j+1].R==255 && 
+				   map[i-1][j].R==255 && map[i+2][j].R==255 )
+				{	
+					dest.setPixel(i, j, Color.rgb(255 , 255, 255));
+					dest.setPixel(i+1, j, Color.rgb(255 , 255, 255));
+					dest.setPixel(i, j+1, Color.rgb(255 , 255, 255));
+					dest.setPixel(i+1, j+1, Color.rgb(255 , 255, 255));
+					j+=2;
 				}
 				else
-					dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+					dest.setPixel(i, j,dest.getPixel(i, j) );
 			}
-			
-//************************ Horizontal pass		
-				for(int j=0; j < sourceImage.getHeight();j++)
-					for(int i =0; i < sourceImage.getWidth() ;i++)
+			else
+			{	
+				dest.setPixel(i, j, dest.getPixel(i, j));
+			}
+		}
+		
+		Log.v(TAG,"Horizontal pass");
+		//************Horizontal pass
+			for(int j=0; j < sourceImage.getHeight();j++)
+				for(int i =0; i < sourceImage.getWidth() ;i++)
+		{
+			if ( (i>=10)&&(i<= sourceImage.getWidth() -10) &&(j>=10)&&(j<= sourceImage.getHeight() -10))
 			{
-				if ( (i!=0)&&(i<= sourceImage.getWidth() -3) &&(j!=0)&&(j<= sourceImage.getHeight() -3))
-				{
-					if(map[i][j].R ==0 && map[i+1][j].R==255 && map[i+1][j-1].R==0 )
-					{
-						start = i;end=i+1;flag = 1;
-						while(map[i+1+flag][j].R==255 && map[i+1+flag][j-1].R==0)
-						{
-							flag++;
-							end = i+1+flag;
-						}
-						if(map[i+1+flag][j].R==0 && map[i+1+flag][j-1].R==0 && ((end - start)<3))
-						{	
-							for (int k =start; k<=end;k++)
-							{	
-								dest.setPixel(k, j, Color.rgb(0, 0, 0));
-								counter2 =1;
-							}
-							if(counter2==1)
-								{i+=(end-start);flag=0;}
-						}
-						//else
-							//dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
-					}
-					//else
-						//dest.setPixel(i, j,Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B) );
+				if(map[i-1][j-1].R==255 && map[i][j-1].R==255 && map[i+1][j-1].R==255 && map[i+2][j-1].R==255 &&   
+				   map[i-1][j+1].R==255 && map[i][j+1].R==255 && map[i+1][j+1].R==255 && map[i+2][j+1].R==255 && 
+				   map[i-1][j].R==255 && map[i+2][j].R==255 )
+				{	
+					dest.setPixel(i, j, Color.rgb(255 , 255, 255));
+					dest.setPixel(i+1, j, Color.rgb(255 , 255, 255));
+					dest.setPixel(i, j+1, Color.rgb(255 , 255, 255));
+					dest.setPixel(i+1, j+1, Color.rgb(255 , 255, 255));
+					i+=2;
 				}
-				//else
-					//dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+				else
+					dest.setPixel(i, j,dest.getPixel(i, j) );
 			}
+			else
+			{	
+				dest.setPixel(i, j, dest.getPixel(i, j));
+			}
+		}
+		
+//		//************Vertical pass
+//			for(int i =0; i < sourceImage.getWidth() ;i++)
+//				for(int j=0; j < sourceImage.getHeight();j++)
+//			{
+//				if ( (i!=0)&&(i<= sourceImage.getWidth() -3) &&(j!=0)&&(j<= sourceImage.getHeight() -3))
+//				{
+//					if(map[i][j].R ==0 && map[i][j+1].R==255 && map[i+1][j+1].R==0 )
+//					{
+//						start = j;end=j;flag = 1;
+//						while(map[i][j+1+flag].R==255 && map[i+1][j+1+flag].R==0)
+//						{
+//							flag++;
+//							end = j+1+flag;
+//						}
+//						if(map[i][j+1+flag].R==0 && map[i+1][j+1+flag].R==0)
+//						{	
+//							for (int k =start; k<=end;k++)
+//							{	
+//								dest.setPixel(i, k, Color.rgb(0 , 0, 0));
+//								counter1 =1;
+//							}
+//							if(counter1==1)
+//								{j+=(end-start);flag=0;}
+//						}
+//						else
+//							dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+//					}
+//					else
+//						dest.setPixel(i, j,Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B) );
+//				}
+//				else
+//					dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+//			}
+//			
+////************************ Horizontal pass		
+//				for(int j=0; j < sourceImage.getHeight();j++)
+//					for(int i =0; i < sourceImage.getWidth() ;i++)
+//			{
+//				if ( (i!=0)&&(i<= sourceImage.getWidth() -3) &&(j!=0)&&(j<= sourceImage.getHeight() -3))
+//				{
+//					if(map[i][j].R ==0 && map[i+1][j].R==255 && map[i+1][j-1].R==0 )
+//					{
+//						start = i;end=i+1;flag = 1;
+//						while(map[i+1+flag][j].R==255 && map[i+1+flag][j-1].R==0)
+//						{
+//							flag++;
+//							end = i+1+flag;
+//						}
+//						if(map[i+1+flag][j].R==0 && map[i+1+flag][j-1].R==0 && ((end - start)<3))
+//						{	
+//							for (int k =start; k<=end;k++)
+//							{	
+//								dest.setPixel(k, j, Color.rgb(0, 0, 0));
+//								counter2 =1;
+//							}
+//							if(counter2==1)
+//								{i+=(end-start);flag=0;}
+//						}
+//						//else
+//							//dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+//					}
+//					//else
+//						//dest.setPixel(i, j,Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B) );
+//				}
+//				//else
+//					//dest.setPixel(i, j, Color.rgb(map[i][j].R, map[i][j].G, map[i][j].B));
+//			}
 			
 			
 //****************		From the other side, filler		
@@ -383,9 +460,6 @@ public class Analyse {
 	return uri;
 	
 	}
-		
-		//sourceImage.ge
-		
 	
 	//Analyses each background segmented and sees if it requires reversed Adaptive thresholding
 	public List<Uri> adaptiveSplitter()

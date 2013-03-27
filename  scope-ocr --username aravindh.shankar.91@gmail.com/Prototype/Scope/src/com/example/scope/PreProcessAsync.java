@@ -1,5 +1,6 @@
 package com.example.scope;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 	final Uri uri;
 	Uri process_uri_1, process_uri_2;
 	private static final String TAG = "Scope.java";
+	List <Uri> segmentedResults_final =  new ArrayList<Uri>();
 
 	public PreProcessAsync(Uri uri, PreProcess main) {
 		this.uri = uri;
@@ -56,13 +58,18 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 				"adpt1.bmp");
 		Uri ppimage2 = initadpt.thresh();
 		
+//		Analyse dig = new Analyse(preprocess.getApplicationContext(),
+//		ppimage2, "dig.bmp");
+//		dig.filler();
+		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
 		Log.v(TAG, "Adapt thresh time: " + diff);
 		now = new Date();
 		
-      Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
-      Uri ppimage3 = morphing1.erode_iterate(30, 7);	
+		publishProgress("Morphing thresholding");
+		Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
+		Uri ppimage3 = morphing1.erode_iterate(30, 7);	
       
       	later = new Date();
 		diff = later.getTime() - now.getTime();
@@ -79,19 +86,29 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		diff = later.getTime() - now.getTime();
 		Log.v(TAG, "Line segmentation time: " + diff);
 		now = new Date();
-		
-		Log.v(TAG, "error: "+ segmentedResults.get(0));
-
+	
+		publishProgress("Cleaning segments");
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
-		List <Uri> segmentedResults_final = analyser.adaptiveSplitter();
+		List <Uri> segmentedResults_analysed = analyser.adaptiveSplitter();
 		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
 		Log.v(TAG, "Adaptive splitter time: " + diff);
-		//now = new Date();
+		now = new Date();
 		
 		publishProgress("Cleaning segments");
+		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
+		Analyse fill = new Analyse(preprocess.getApplicationContext(),
+				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
+		segmentedResults_final.add(fill.filler());
+		}
+		
+		later = new Date();
+		diff = later.getTime() - now.getTime();
+		Log.v(TAG, "Cleaning image time: " + diff);
+		//now = new Date();
+		
 //		// Cleaner function
 //		for (int i = 0; i < segmentedResults.size(); i++) {
 //			Threshold thresh = new Threshold(
