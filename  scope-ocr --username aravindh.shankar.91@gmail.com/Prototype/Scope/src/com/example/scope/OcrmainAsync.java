@@ -103,7 +103,7 @@ public class OcrmainAsync extends AsyncTask<Void, Void, String> {
 		Log.v(TAG, "started post background");
 		ocrmain.checkIntentDone();
 		progressDialog.dismiss();
-
+		myimage.recycle();
 	}
 
 }

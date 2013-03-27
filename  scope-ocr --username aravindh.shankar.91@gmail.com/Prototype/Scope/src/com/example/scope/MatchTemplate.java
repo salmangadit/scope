@@ -72,7 +72,7 @@ public class MatchTemplate {
 		Log.i(TAG, "Image loaded from res folder");
 			
 		//   Initialize the input image source
-		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.smallnuslogo);
+		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.nuslogo);
 		
 		Log.i(TAG, "Changed to matrix from image!");
 		

@@ -69,7 +69,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		
 		publishProgress("Morphing thresholding");
 		Morphing morphing1 = new Morphing(preprocess.getApplicationContext(),ppimage2);
-		Uri ppimage3 = morphing1.erode_iterate(30, 7);	
+		Uri ppimage3 = morphing1.erode_iterate(30, 10);	
       
       	later = new Date();
 		diff = later.getTime() - now.getTime();
@@ -99,24 +99,17 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		
 		publishProgress("Cleaning segments");
 		
-//		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
-//		Analyse fill = new Analyse(preprocess.getApplicationContext(),
-//				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
-//		segmentedResults_final.add(fill.filler());
-//		}
+		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
+		Analyse fill = new Analyse(preprocess.getApplicationContext(),
+				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
+		segmentedResults_final.add(fill.filler());
+		}
 		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
 		Log.v(TAG, "Cleaning image time: " + diff);
 		//now = new Date();
 		
-//		// Cleaner function
-//		for (int i = 0; i < segmentedResults.size(); i++) {
-//			Threshold thresh = new Threshold(
-//					preprocess.getApplicationContext(),
-//					segmentedResults.get(i), "clean" + i + ".bmp");
-//			segmentedResults.set(i, thresh.thresh_binary(1, 255));
-//		}
 		// Check if card is NUS card
 		MatchTemplate matcher = new MatchTemplate(uri, preprocess.getApplicationContext());
 		boolean isNUS = matcher.TemplateMatch();
@@ -127,15 +120,6 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		} else {
 			Log.v(TAG, "This is NOT an NUS card");
 		}
-		// ONLY IF NUS CARD FOR NOW
-//		if (isNUS) {
-//			publishProgress("Applying cleaning for NUS card");
-//			for (int i = 0; i < segmentedResults.size(); i++) {
-//				Analyse fill = new Analyse(preprocess.getApplicationContext(),
-//						segmentedResults.get(i), "temple" + i + ".bmp");
-//				segmentedResults.set(i, fill.filler());
-//			}
-//		}
 
 		Globals appState = ((Globals) preprocess.getApplicationContext());
 		appState.setAdaptiveResult(segmentedResults_final);

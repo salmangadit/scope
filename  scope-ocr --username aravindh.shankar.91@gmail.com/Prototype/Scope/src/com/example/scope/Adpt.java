@@ -82,6 +82,8 @@ public class Adpt {
 
 		store();
 		Log.v(TAG, uri.toString());
+		sourceImage.recycle();
+		destImage.recycle();
 		return uri;
 	}
 	
@@ -108,6 +110,8 @@ public class Adpt {
 
 		store();
 		Log.v(TAG, uri.toString());
+		sourceImage.recycle();
+		destImage.recycle();
 		return uri;
 	}
 	
