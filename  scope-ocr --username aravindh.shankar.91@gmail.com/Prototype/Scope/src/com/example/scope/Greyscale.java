@@ -95,7 +95,7 @@ public class Greyscale {
 			Log.v(TAG, "null2");
 			e.printStackTrace();
 		}
-
+		sourceImage.recycle();
 		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
 		

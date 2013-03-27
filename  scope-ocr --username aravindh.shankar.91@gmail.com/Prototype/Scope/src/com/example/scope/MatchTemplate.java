@@ -1,4 +1,4 @@
-package com.example.test;
+package com.example.scope;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,24 +47,14 @@ public class MatchTemplate {
 	Bitmap source;
 	Context currContext;
 	
-	private static final String TAG = "MainActivity";
-	static
-	{
-		if(!OpenCVLoader.initDebug())
-		{
-			Log.e(TAG, "Some Error! OpenCV not loaded dude!");
-		}
-	}
+	private static final String TAG = "Scope";
 	
-	
-	public MatchTemplate(Uri source_uri, Bitmap sourceimage, Context c)
+	public MatchTemplate(Uri source_uri, Context c)
 	{
 		this.inputimage_uri=source_uri;
-		this.source=sourceimage;
 		this.currContext=c;
 	}
-	
-	
+
 	public Boolean TemplateMatch() 
 	{
 		try {
