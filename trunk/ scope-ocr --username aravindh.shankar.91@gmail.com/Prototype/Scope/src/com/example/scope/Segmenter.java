@@ -231,11 +231,12 @@ public class Segmenter {
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
 		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_BGR2GRAY,
 				0);
-		Imgproc.medianBlur(destImageMat, destImageMat, 7);
+		Imgproc.medianBlur(destImageMat, destImageMat, 5);
 		Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 15, 2);
 
 		Imgproc.dilate(destImageMat, destImageMat, new Mat(), new Point(), 6);
-		Imgproc.erode(destImageMat, destImageMat, new Mat(), new Point(), 2);
+		Imgproc.erode(destImageMat, destImageMat, Mat.ones(new Size(3, 3), 0),
+				new Point(), 1);
 
 		// Imgproc.threshold(destImageMat, destImageMat, 160, 160,
 		// Imgproc.THRESH_BINARY_INV);
@@ -265,8 +266,7 @@ public class Segmenter {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
-		Log.v(TAG,
-				"Total contours found: " + contours.size());
+		Log.v(TAG, "Total contours found: " + contours.size());
 		Log.v(TAG,
 				"Total text regions found: " + boundingRectangles_temp.size());
 
@@ -295,10 +295,112 @@ public class Segmenter {
 
 			boundingRectangles.add(boundingRectangles_temp.get(i));
 		}
-		
+
 		Log.v(TAG, "After removing inner rects: " + boundingRectangles.size());
 
-		int MIN_DIST_CORNERS = 60;
+		List<Rect> boundingClusteredRects = performClustering(sourceImageMat,
+				boundingRectangles);
+
+		Log.v(TAG, "After clustering pass 1: " + boundingClusteredRects.size());
+
+		boolean hasOverlap = false;
+
+		for (int i = 0; i < boundingClusteredRects.size(); i++) {
+			for (int j = 0; j < boundingClusteredRects.size(); j++) {
+				if (i == j) {
+					continue;
+				} else if (rectOverlap(boundingClusteredRects.get(i),
+						boundingClusteredRects.get(j))) {
+					hasOverlap = true;
+					break;
+				}
+			}
+
+			if (hasOverlap) {
+				break;
+			}
+		}
+
+		if (hasOverlap) {
+			Log.v(TAG, "Second pass required!");
+
+			boundingClusteredRects = performClustering(sourceImageMat,
+					boundingClusteredRects);
+
+			Log.v(TAG,
+					"After clustering pass 2: " + boundingClusteredRects.size());
+		}
+
+		// Mat drawing = Mat.zeros(destImageMat.size(), CvType.CV_8UC3);
+		for (int i = 0; i < boundingClusteredRects.size(); i++) {
+			Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),
+					(rand.nextInt(max - min + 1) + min), (rand.nextInt(max
+							- min + 1) + min));
+			// Imgproc.drawContours(destImageMat, contours, i, color, 1, 8,
+			// heirarchy, 0, new Point());
+			// Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
+			// boundingRectangles.get(i).br(), color, 2, 8, 0);
+
+			// Create region of interest and save as a seperate file
+			Mat cropped = performCrop(boundingClusteredRects.get(i).x,
+					boundingClusteredRects.get(i).y,
+					boundingClusteredRects.get(i).width,
+					boundingClusteredRects.get(i).height, sourceImageMat);
+
+			coordinates.add(boundingClusteredRects.get(i).x + ":"
+					+ boundingClusteredRects.get(i).y);
+
+			destImage = Bitmap.createBitmap(
+					boundingClusteredRects.get(i).width,
+					boundingClusteredRects.get(i).height,
+					Bitmap.Config.ARGB_8888);
+
+			Utils.matToBitmap(cropped.clone(), destImage);
+
+			Log.v(TAG, "destImage Size:" + destImage.getByteCount());
+
+			File file = new File(
+					Environment
+							.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+					"bg-seg" + backgroundSegmentationId + "-text-seg" + i
+							+ ".bmp");
+
+			try {
+				FileOutputStream out = new FileOutputStream(file);
+				destImage.compress(Bitmap.CompressFormat.PNG, 90, out);
+			} catch (Exception e) {
+				Log.v(TAG, "null2");
+				e.printStackTrace();
+			}
+
+			final Uri uri = Uri.fromFile(file);
+			Log.v(TAG, uri.toString());
+			segmentedResults.add(uri);
+		}
+
+		if (segmentedResults.size() == 0) {
+			Log.v(TAG, "No Segments Found. Returning original");
+			segmentedResults.add(inputImageUri);
+			coordinates.add("99:99");
+		}
+
+		return segmentedResults;
+	}
+
+	private List<Rect> performClustering(Mat sourceImageMat,
+			List<Rect> boundingRectangles) {
+
+		int width = sourceImageMat.width();
+		int height = sourceImageMat.height();
+		double minDist = Math.sqrt((width * width) + (height * height)) * 0.05;
+
+		Log.v(TAG, "Image width: " + width + ", height:" + height
+				+ ", possible min dist:" + minDist);
+		double MIN_DIST_CORNERS = minDist;
+
+		double distSum = 0;
+		double distCount = 0;
+
 		List<List<Rect>> clusters = new ArrayList<List<Rect>>(
 				boundingRectangles.size());
 
@@ -352,7 +454,8 @@ public class Segmenter {
 				for (int m = 0; m < first.size(); m++) {
 					for (int n = 0; n < second.size(); n++) {
 						double distance = distance(first.get(m), second.get(n));
-
+						distSum += distance;
+						distCount++;
 						if (distance < MIN_DIST_CORNERS) {
 							if (!toCluster.contains(boundingRectangles.get(i))) {
 								toCluster.add(boundingRectangles.get(i));
@@ -440,63 +543,26 @@ public class Segmenter {
 					(int) (maxX - minX), (int) (maxY - minY));
 			boundingClusteredRects.add(clustered);
 		}
-		
-		Log.v(TAG, "After clustering: " + boundingClusteredRects.size());
 
-		//Mat drawing = Mat.zeros(destImageMat.size(), CvType.CV_8UC3);
-		for (int i = 0; i < boundingClusteredRects.size(); i++) {
-			Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),
-					(rand.nextInt(max - min + 1) + min), (rand.nextInt(max
-							- min + 1) + min));
-			// Imgproc.drawContours(destImageMat, contours, i, color, 1, 8,
-			// heirarchy, 0, new Point());
-			// Core.rectangle(sourceImageMat, boundingRectangles.get(i).tl(),
-			// boundingRectangles.get(i).br(), color, 2, 8, 0);
-
-			// Create region of interest and save as a seperate file
-			Mat cropped = performCrop(boundingClusteredRects.get(i).x,
-					boundingClusteredRects.get(i).y,
-					boundingClusteredRects.get(i).width,
-					boundingClusteredRects.get(i).height, sourceImageMat);
-
-			coordinates.add(boundingClusteredRects.get(i).x + ":"
-					+ boundingClusteredRects.get(i).y);
-
-			destImage = Bitmap.createBitmap(boundingClusteredRects.get(i).width,
-					boundingClusteredRects.get(i).height, Bitmap.Config.ARGB_8888);
-
-			Utils.matToBitmap(cropped.clone(), destImage);
-
-			Log.v(TAG, "destImage Size:" + destImage.getByteCount());
-
-			File file = new File(
-					Environment
-							.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-					"bg-seg" + backgroundSegmentationId + "-text-seg" + i
-							+ ".bmp");
-
-			try {
-				FileOutputStream out = new FileOutputStream(file);
-				destImage.compress(Bitmap.CompressFormat.PNG, 90, out);
-			} catch (Exception e) {
-				Log.v(TAG, "null2");
-				e.printStackTrace();
-			}
-
-			final Uri uri = Uri.fromFile(file);
-			Log.v(TAG, uri.toString());
-			segmentedResults.add(uri);
-		}
-
-		if (segmentedResults.size() == 0) {
-			Log.v(TAG, "No Segments Found. Returning original");
-			segmentedResults.add(inputImageUri);
-			coordinates.add("99:99");
-		}
-
-		return segmentedResults;
+		Log.v(TAG, "This pass, average distance: " + distSum / distCount
+				+ " , counts: " + distCount);
+		return boundingClusteredRects;
 	}
-	
+
+	private boolean valueInRange(int value, int min, int max) {
+		return (value >= min) && (value <= max);
+	}
+
+	private boolean rectOverlap(Rect A, Rect B) {
+		boolean xOverlap = valueInRange(A.x, B.x, B.x + B.width)
+				|| valueInRange(B.x, A.x, A.x + A.width);
+
+		boolean yOverlap = valueInRange(A.y, B.y, B.y + B.height)
+				|| valueInRange(B.y, A.y, A.y + B.height);
+
+		return xOverlap && yOverlap;
+	}
+
 	private double distance(Point p1, Point p2) {
 		return Math
 				.sqrt((Math.pow((p1.x - p2.x), 2) + Math.pow(p1.y - p2.y, 2)));

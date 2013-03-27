@@ -90,7 +90,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		publishProgress("Cleaning segments");
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
-		List <Uri> segmentedResults_analysed = analyser.adaptiveSplitter();
+		List <Uri> segmentedResults_final = analyser.adaptiveSplitter();
 		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
@@ -98,11 +98,11 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		now = new Date();
 		
 		publishProgress("Cleaning segments");
-		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
-		Analyse fill = new Analyse(preprocess.getApplicationContext(),
-				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
-		segmentedResults_final.add(fill.filler());
-		}
+//		for (int i = 0; i < segmentedResults_analysed.size(); i++) {
+//		Analyse fill = new Analyse(preprocess.getApplicationContext(),
+//				segmentedResults_analysed.get(i), "filled" + i + ".bmp");
+//		segmentedResults_final.add(fill.filler());
+//		}
 		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
@@ -117,16 +117,15 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 //			segmentedResults.set(i, thresh.thresh_binary(1, 255));
 //		}
 		// Check if card is NUS card
-//		MatchTemplate matcher = new MatchTemplate(uri,
-//				preprocess.getApplicationContext());
-//		boolean isNUS = matcher.TM();
+		MatchTemplate matcher = new MatchTemplate(uri, preprocess.getApplicationContext());
+		boolean isNUS = matcher.TemplateMatch();
 		//boolean isNUS = true;
 
-//		if (isNUS) {
-//			Log.v(TAG, "This is an NUS card");
-//		} else {
-//			Log.v(TAG, "This is NOT an NUS card");
-//		}
+		if (isNUS) {
+			Log.v(TAG, "This is an NUS card");
+		} else {
+			Log.v(TAG, "This is NOT an NUS card");
+		}
 		// ONLY IF NUS CARD FOR NOW
 //		if (isNUS) {
 //			publishProgress("Applying cleaning for NUS card");

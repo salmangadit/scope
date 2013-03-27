@@ -78,6 +78,7 @@ public class CropScreen extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				myimage.recycle();
 				Log.v(TAG, "OCR button clicked");
 				Intent intent = new Intent(a, PreProcess.class);
 				intent.putExtra("file_path", filepath);
