@@ -1,4 +1,4 @@
-package com.example.scope;
+package com.example.test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,10 +44,10 @@ import android.util.Log;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class MatchTemplate {
 	Uri inputimage_uri;
-	Bitmap source = null;
+	Bitmap source;
 	Context currContext;
 	
-	private static final String TAG = "Scope.java";
+	private static final String TAG = "MainActivity";
 	static
 	{
 		if(!OpenCVLoader.initDebug())
@@ -57,14 +57,15 @@ public class MatchTemplate {
 	}
 	
 	
-	public MatchTemplate(Uri source_uri, Context c)
+	public MatchTemplate(Uri source_uri, Bitmap sourceimage, Context c)
 	{
 		this.inputimage_uri=source_uri;
+		this.source=sourceimage;
 		this.currContext=c;
 	}
 	
 	
-	public boolean TM() 
+	public Boolean TemplateMatch() 
 	{
 		try {
 			source = MediaStore.Images.Media.getBitmap(
@@ -81,121 +82,125 @@ public class MatchTemplate {
 		Log.i(TAG, "Image loaded from res folder");
 			
 		//   Initialize the input image source
-		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.nuslogo);
+		Bitmap template = BitmapFactory.decodeResource(currContext.getResources(), R.drawable.smallnuslogo);
 		
 		Log.i(TAG, "Changed to matrix from image!");
 		
-		int s_rows = source.getHeight(); 
-		int s_cols = source.getWidth();
-		int t_rows = template.getHeight();
-		int t_cols = template.getWidth();
+		//     **  Whole bunch of initialisation shizz  **
+		//     These ints determine the size of the Mats according to the input image n template
+		int s_rows = source.getHeight();    Log.i(TAG, "source rows: "+s_rows);
+		int s_cols = source.getWidth();     Log.i(TAG, "source cols: "+s_cols);
+		int t_rows = template.getHeight();  Log.i(TAG, "template rows: "+t_rows);
+		int t_cols = template.getWidth();   Log.i(TAG, "template cols: "+t_cols);
 		
-		
+		//    Create all necessary Mats
 		Mat sourceMat = new Mat(s_rows,s_cols,CvType.CV_32F); //NUS card image matrix in 32F depth
 		Mat src_copy = new Mat (s_rows,s_cols, CvType.CV_32F);
-		
-		Mat logo = new Mat(t_rows, t_cols, CvType.CV_32F);      //NUS logo image matrix
-		Mat grayMat = new Mat();   //Grayscale of sourceMat		
+		Mat logo = new Mat(t_rows, t_cols, CvType.CV_32F);      //NUS logo matrix
+		Mat grayMat = new Mat(s_rows,s_cols, CvType.CV_32F);   //Grayscale of sourceMat		
 		Mat logoMat = new Mat(t_rows, t_cols, CvType.CV_32F);   //NUS logo matrix after grayscale
 		Log.i(TAG, "New Mats loaded");
 		
-		//  Convert bitmap image to Mat format 			
-		Utils.bitmapToMat(source, sourceMat);
-		Utils.bitmapToMat(template, logo);
-		Log.i(TAG, "Convert bitmap to Mat");
+	    //   Create results matrix
+		int result_cols = src_copy.cols() - logoMat.cols() + 1;
+		int result_rows = src_copy.rows() - logoMat.rows() + 1;		
+		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
+		Log.i(TAG, "Results matrix created");
+		Log.i(TAG, "Result_cols : "+result_cols);
+		Log.i(TAG, "Result_rows : "+result_rows);
+	
+		//     Convert the bitmaps to Mats function
+		BitmapToMat(source, template, sourceMat, logo);
 		
 		//    Create copy of the source image
 		sourceMat.copyTo(src_copy);
 		
 		//     Grayscale function
-		Log.i(TAG, "Starting Grayscale");
-		Imgproc.cvtColor(src_copy, grayMat, Imgproc.COLOR_RGB2GRAY); //Convert testMat to grayscaled grayMat
-		Imgproc.cvtColor(logo, logoMat, Imgproc.COLOR_RGB2GRAY);	//Convert logo to grayscaled logoMat
-		Log.i(TAG, "Grayscale DONE");
+		Grayscale(src_copy, grayMat, logo, logoMat);
 		
-				
-		//   Create results matrix
-		int result_cols = src_copy.cols() - logoMat.cols() + 1;
-		int result_rows = src_copy.rows() - logoMat.rows() + 1;		
-		Log.i(TAG, "Result_cols : "+result_cols);
-		Log.i(TAG, "Result_rows : "+result_rows);
-		Mat result = new Mat(result_rows, result_cols, CvType.CV_32F); 
-		Log.i(TAG, "Results matrix created");
-		
-		
-		Log.i(TAG, "Running method 1"); 
-		Boolean loop1 = runTM(Imgproc.TM_CCOEFF, grayMat, logoMat, result); 
-		Log.i(TAG, "Running method 2");
-		Boolean loop2 = runTM(Imgproc.TM_CCOEFF_NORMED, grayMat, logoMat, result); 
-		Log.i(TAG, "Running method 3");
-		Boolean loop3 = runTM(Imgproc.TM_CCORR, grayMat, logoMat, result);  
-		Log.i(TAG, "Running method 4");
-		Boolean loop4 = runTM(Imgproc.TM_CCORR_NORMED, grayMat, logoMat, result); 
-		Log.i(TAG, "Running method 5");
-		Boolean loop5 = runTM(Imgproc.TM_SQDIFF, grayMat, logoMat, result); 
-		Log.i(TAG, "Running method 6");
-		Boolean loop6 = runTM(Imgproc.TM_SQDIFF_NORMED, grayMat, logoMat, result);
-		
-		//  Create variable to determine a match or not. 
-		//   This is a bool value where TRUE=match &  FALSE=not a match
-		Boolean confirm = loop1|loop2|loop3|loop4|loop5|loop6;  Log.i(TAG, "Final confirmation of template Matching.." +confirm);  
-		return confirm;
-		
-	}
-		
-	public Boolean runTM(int process, Mat grayMat, Mat logoMat, Mat result) 
-	{
-	
-		
-		//	    Run Template Matching function
-		Log.i(TAG, "Starting template match");
-		Imgproc.matchTemplate(grayMat, logoMat, result, Imgproc.TM_CCOEFF);
-		Log.i(TAG, "Template match DONE");
-		Core.normalize(result, result, 0, 1,Core.NORM_MINMAX, -1, new Mat());
-		
-	
-		//    Get maxima minima
-		Core.MinMaxLocResult locres = Core.minMaxLoc(result);
-		Log.i(TAG, "Minima maxima FOUND");
-		
-		Point matchLoc = locres.maxLoc;  //This depends on the type of template match carried out
-										// This point is the origin point of the template rectangle identified on the image
-		Log.i(TAG, "MaxLoc FOUND");	
-		
-		//   Draw rectangle around matched template  
-		Log.i(TAG, "Drawing RECT |___|");
-		
-		Point rect_end = new Point (matchLoc.x + logoMat.cols(), matchLoc.y + logoMat.rows());
-		Log.i(TAG, "RECT origin points");
-		Log.v(TAG, "x is " + matchLoc.x);
-		Log.v(TAG, "y is " + matchLoc.y);
-		
-		Log.i(TAG, "RECT end points");
-		Log.v(TAG, "x is " + rect_end.x);
-		Log.v(TAG, "y is " + rect_end.y);
-		
-		//      TEST DATA    //
-		//
-		Point origin = new Point(950,65);
-		Point test_end = new Point(1550,325);
-		
-		//  Create variable to determine a match or not. 
-		//  This is a bool value where TRUE=match &  FALSE=not a match
-		Boolean loop;
-			
-		//   This function checks whether the coordinates of the template and the identified area match.
-		//   If so, a String output is shown on the screen
-		if((Math.abs(origin.x - matchLoc.x)<= 300) && (Math.abs(origin.y - matchLoc.y)<= 300) && (Math.abs(test_end.x - rect_end.x)<= 300) && (Math.abs(test_end.y - rect_end.y)<= 300))
-			{
-				loop=true;
-				Log.i(TAG,"Templates match! This is an NUS card! "+loop);
-			}
-		else
-			{
-				loop=false;
-				Log.i(TAG,"It's not quite a match."+loop);
-			}
+		//     Match Template function
+		Boolean loop = runTM(Imgproc.TM_CCOEFF_NORMED, grayMat, logoMat, result);
+		Log.i(TAG, "Final confirmation of template Matching.." +loop);
 		
 		return loop;
-	}
+}
+		
+		public void BitmapToMat(Bitmap source, Bitmap template, Mat sourceMat, Mat logo)
+		{
+			//  Convert bitmap image to Mat format 			
+			Utils.bitmapToMat(source, sourceMat);
+			Utils.bitmapToMat(template, logo);
+			Log.i(TAG, "Convert bitmap to Mat");
+			
+		}
+		
+		public void Grayscale(Mat src_copy, Mat grayMat, Mat logo, Mat logoMat)
+		{
+			//	     Grayscale function
+			Log.i(TAG, "Starting Grayscale");
+			Imgproc.cvtColor(src_copy, grayMat, Imgproc.COLOR_RGB2GRAY); //Convert testMat to grayscaled grayMat
+			Imgproc.cvtColor(logo, logoMat, Imgproc.COLOR_RGB2GRAY);	//Convert logo to grayscaled logoMat
+			Log.i(TAG, "Grayscale DONE");
+		}
+		
+		public Boolean runTM(int process, Mat grayMat1, Mat logoMat1, Mat result1) 
+		{
+			Mat grayMat = grayMat1;   //Grayscale of sourceMat		
+			Mat logoMat = logoMat1;   //NUS logo matrix after grayscale
+			Mat result = result1;
+			
+			//	    Run Template Matching function
+			Log.i(TAG, "Starting template match");
+			Imgproc.matchTemplate(grayMat, logoMat, result, process);
+			Log.i(TAG, "Template match DONE");
+			Core.normalize(result, result, 0, 1,Core.NORM_MINMAX, -1, new Mat());
+			
+		
+			//    Get maxima minima
+			Core.MinMaxLocResult locres = Core.minMaxLoc(result);
+			Log.i(TAG, "Minima maxima FOUND");
+			
+			Point matchLoc; // This point is the origin point of the template rectangle identified on the image
+			if (process > 2)
+			{
+			matchLoc = locres.maxLoc;  //This depends on the type of template match carried out
+			Log.i(TAG, "MaxLoc FOUND");	
+			}
+			else {
+						matchLoc = locres.minLoc;
+				}
+		
+			Point rect_end = new Point (matchLoc.x + logoMat.cols(), matchLoc.y + logoMat.rows());
+			Log.i(TAG, "RECT origin points");
+			Log.v(TAG, "x is " + matchLoc.x);
+			Log.v(TAG, "y is " + matchLoc.y);
+			
+			Log.i(TAG, "RECT end points");
+			Log.v(TAG, "x is " + rect_end.x);
+			Log.v(TAG, "y is " + rect_end.y);
+			
+			
+			//  Create variable to determine a match or not. 
+			//  This is a bool value where TRUE=match &  FALSE=not a match
+			Boolean loop;
+				
+			//   This function checks whether the coordinates of the template and the identified area match.
+			//   If so, a String output is shown on the screen
+			if(Math.abs(rect_end.x - matchLoc.x) == 456 && Math.abs(rect_end.y - matchLoc.y) == 235)
+			{
+				loop=true;
+				Log.i(TAG," Templates match! This is an NUS card! " +loop);
+			}
+			else
+				{
+					loop=false;
+					Log.i(TAG,"It's not quite a match." +loop);
+				}
+
+		
+			return loop;
+			
+		}
+		
+
 }
