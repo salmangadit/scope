@@ -231,11 +231,11 @@ public class Segmenter {
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
 		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_BGR2GRAY,
 				0);
-		Imgproc.medianBlur(destImageMat, destImageMat, 3);
+		Imgproc.medianBlur(destImageMat, destImageMat, 7);
 		Imgproc.adaptiveThreshold(destImageMat, destImageMat, 255, 1, 1, 15, 2);
 
-		Imgproc.dilate(destImageMat, destImageMat, new Mat(), new Point(), 4);
-		Imgproc.erode(destImageMat, destImageMat, new Mat(), new Point(), 1);
+		Imgproc.dilate(destImageMat, destImageMat, new Mat(), new Point(), 6);
+		Imgproc.erode(destImageMat, destImageMat, new Mat(), new Point(), 2);
 
 		// Imgproc.threshold(destImageMat, destImageMat, 160, 160,
 		// Imgproc.THRESH_BINARY_INV);
@@ -298,7 +298,7 @@ public class Segmenter {
 		
 		Log.v(TAG, "After removing inner rects: " + boundingRectangles.size());
 
-		int MIN_DIST_CORNERS = 40;
+		int MIN_DIST_CORNERS = 60;
 		List<List<Rect>> clusters = new ArrayList<List<Rect>>(
 				boundingRectangles.size());
 

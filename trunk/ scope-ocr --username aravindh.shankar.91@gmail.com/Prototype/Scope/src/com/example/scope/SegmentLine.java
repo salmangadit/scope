@@ -126,8 +126,10 @@ public class SegmentLine {
 
 		// Check tolerance area for large rectangles
 		int sourceImageArea = sourceImageMat.width() * sourceImageMat.height();
-		double sourceAreaTolerance = sourceImageArea * 0.9;
+		double sourceAreaTolerance = sourceImageArea * 0.95;
 		double sourceAreaMinTolerance = sourceImageArea * 0.01;
+		
+		Log.v(TAG, "Number of Contours: " + contours.size());
 
 		for (int i = 0; i < contours.size(); i++) {
 			Rect currentRectangle = Imgproc.boundingRect(contours.get(i));
@@ -137,6 +139,8 @@ public class SegmentLine {
 				boundingRectangles_temp.add(currentRectangle);
 			}
 		}
+		
+		Log.v(TAG, "After size restrictions: " + boundingRectangles_temp.size());
 
 		// Remove all rectangles inside any outer rectangles
 		List<Integer> toRemove = new ArrayList<Integer>();
@@ -164,16 +168,15 @@ public class SegmentLine {
 			boundingRectangles.add(boundingRectangles_temp.get(i));
 		}
 
-		if(boundingRectangles.size()>10)
-			{Log.v(TAG,"tooo many "+boundingRectangles.size());return segmentedResults;}
-		Log.v(TAG, "bound " + boundingRectangles.size());
+		Log.v(TAG, "After inner rects " + boundingRectangles.size());
+
 		for (int i = 0; i < boundingRectangles.size(); i++) {
 			Scalar color = new Scalar((rand.nextInt(max - min + 1) + min),
 					(rand.nextInt(max - min + 1) + min), (rand.nextInt(max
 							- min + 1) + min));
 
-			Core.rectangle(filterImageMat, boundingRectangles.get(i).tl(),
-					boundingRectangles.get(i).br(), color, 2, 8, 0);
+//			Core.rectangle(filterImageMat, boundingRectangles.get(i).tl(),
+//					boundingRectangles.get(i).br(), color, 2, 8, 0);
 
 			// Create region of interest and save as a seperate file
 			Mat cropped = performCrop(boundingRectangles.get(i).x,
