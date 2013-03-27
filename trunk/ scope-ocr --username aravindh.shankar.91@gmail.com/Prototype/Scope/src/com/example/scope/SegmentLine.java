@@ -213,6 +213,10 @@ public class SegmentLine {
 			segmentedResults.add(filterImageUri);
 		}
 		
+		sourceImage.recycle();
+		filterImage.recycle();
+		destImage.recycle();
+		
 		return segmentedResults;
 
 	}

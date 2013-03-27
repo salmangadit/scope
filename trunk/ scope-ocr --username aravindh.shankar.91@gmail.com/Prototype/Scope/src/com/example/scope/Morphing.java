@@ -129,6 +129,9 @@ public Uri erode_iterate(double matrixPercentage, int numbers) {
 		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
 		
+		sourceImage.recycle();
+		destImage.recycle();
+		
 		return uri;
 	}
 	
@@ -198,6 +201,9 @@ public Uri erode_iterate(double matrixPercentage, int numbers) {
 
 		final Uri uri = Uri.fromFile(file);
 		Log.v(TAG, uri.toString());
+		
+		sourceImage.recycle();
+		destImage.recycle();
 		
 		return uri;
 	}
