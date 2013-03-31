@@ -87,7 +87,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		Log.v(TAG, "Line segmentation time: " + diff);
 		now = new Date();
 	
-		publishProgress("Cleaning segments");
+		publishProgress("Analysing segments");
 		Analyse analyser = new Analyse(preprocess.getApplicationContext(),
 				segmentedResults);
 		List <Uri> segmentedResults_analysed = analyser.adaptiveSplitter();

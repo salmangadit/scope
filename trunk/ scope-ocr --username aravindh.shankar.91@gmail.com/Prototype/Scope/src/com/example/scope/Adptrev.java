@@ -26,7 +26,7 @@ public class Adptrev {
 	Mat sourceImageMat = new Mat();
 	Bitmap sourceImage = null;
 	Bitmap destImage = null;
-	double MID = 140;
+	double MID = 128;
 	String file_name = "temp.bmp";
 	Uri uri;
 
@@ -85,9 +85,9 @@ public class Adptrev {
 				
 			   double diff = MID - destImageMat.get(i, j)[0];
 			   if (diff>0)
-				   destImageMat.put(i, j,MID + diff + 30);
+				   destImageMat.put(i, j,255);
 			   else
-				   destImageMat.put(i, j,MID - diff - 30);
+				   destImageMat.put(i, j,0);
 			}
 		
 		Utils.matToBitmap(destImageMat, destImage);

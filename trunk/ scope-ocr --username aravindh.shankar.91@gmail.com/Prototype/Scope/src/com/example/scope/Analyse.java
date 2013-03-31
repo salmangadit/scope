@@ -90,7 +90,7 @@ public class Analyse {
 		double low = 0,high = 0;
 		for(int i=0;i<64;i++)
 		{	
-			if(i<=35)
+			if(i<=33)
 				low+=histogram.get(i,0)[0];
 			else
 				high+=histogram.get(i,0)[0];
