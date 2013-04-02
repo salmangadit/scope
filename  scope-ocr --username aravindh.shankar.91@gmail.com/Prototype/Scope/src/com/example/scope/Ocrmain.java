@@ -71,6 +71,7 @@ public class Ocrmain extends Activity {
 		// Segmenter segmenter = new Segmenter(this.getApplicationContext(),
 		// image_uri);
 		// List<Uri> ppimage = segmenter.SegmentBackground();
+		Date now = new Date();
 		allText = new ArrayList<Uri>();
 		allCoords = new ArrayList<String>();
 
@@ -85,7 +86,8 @@ public class Ocrmain extends Activity {
 				allCoords.add(coordinates.get(j));
 			}
 		}
-
+		Date after = new Date();
+		Log.v(TAG, "Text Segmentation time: " + (after.getTime() - now.getTime()));
 		Log.v(TAG, "Total segments: " + allText.size());
 		before = new Date();
 		
@@ -109,6 +111,8 @@ public class Ocrmain extends Activity {
 			
 			new OcrmainAsync(this, allText.get(i), DATA_PATH, result, baseApi)
 					.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//			new OcrmainAsync(this, allText.get(i), DATA_PATH, result, baseApi)
+//			.execute();
 		}
 		// Intent intent = new Intent(this, Contacts.class);
 		// startActivity(intent);

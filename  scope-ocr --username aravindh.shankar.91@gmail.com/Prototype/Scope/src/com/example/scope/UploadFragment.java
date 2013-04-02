@@ -1,5 +1,7 @@
 package com.example.scope;
 
+import java.util.Date;
+
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -93,9 +95,11 @@ public class UploadFragment extends Fragment {
 			Log.v(TAG, "9.. Pass");
 			Log.v(TAG, filePath);
 			
+			Date now = new Date();
 			EdgeDetection detector = new EdgeDetection(a, selectedImage, filePath);
 			Uri EdgeDetectedImage = detector.AutoRotation();
-			
+			Date after = new Date();
+			Log.v(TAG, "Edge detection time: " + (after.getTime() - now.getTime()));
 			//Bitmap yourSelectedImage = BitmapFactory.decodeFile(filePath);
 			//Log.v(TAG, "Image Selected");
 		    //myimage=yourSelectedImage;	

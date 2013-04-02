@@ -3,6 +3,7 @@ package com.example.scope;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
@@ -215,9 +216,11 @@ public class ScanFragment extends Fragment {
 			e.printStackTrace();
 		}
 
+		Date now = new Date();
 		EdgeDetection detector = new EdgeDetection(context, Uri.fromFile(file), filepath);
 		Uri EdgeDetectedImage = detector.AutoRotation();
-
+		Date after = new Date();
+		Log.v(TAG, "Edge detection time: " + (after.getTime() - now.getTime()));
 		// Passing intent over to Ocrmain class
 		Intent intent = new Intent(context, CropScreen.class);
 		// intent.putExtra("file_path", filePath);
