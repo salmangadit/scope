@@ -31,6 +31,7 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 	protected String doInBackground(Void... params) {
 		//progress.setMessage("Greyscaling image");
 		Date now = new Date();
+		Date first = (Date)now.clone();
 		
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
 		Uri ppimage1 = grey.greyscale();
@@ -111,9 +112,9 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		//now = new Date();
 		
 		// Check if card is NUS card
-		MatchTemplate matcher = new MatchTemplate(uri, preprocess.getApplicationContext());
-		boolean isNUS = matcher.TemplateMatch();
-		//boolean isNUS = true;
+//		MatchTemplate matcher = new MatchTemplate(uri, preprocess.getApplicationContext());
+//		boolean isNUS = matcher.TemplateMatch();
+		boolean isNUS = true;
 
 		if (isNUS) {
 			Log.v(TAG, "This is an NUS card");
@@ -126,7 +127,11 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 
 		// progress.setMessage("Pre-processing complete.");
 		publishProgress("Pre-processing complete.");
-
+		
+		Date finished = new Date();
+		diff = finished.getTime() - first.getTime();
+		Log.v(TAG, "Pre process time: " + diff);
+		
 		Log.v(TAG, "finished background");
 		preprocess.result_uri = uri;
 		return null;

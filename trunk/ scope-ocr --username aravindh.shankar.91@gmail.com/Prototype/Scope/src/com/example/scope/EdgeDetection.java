@@ -99,7 +99,19 @@ public class EdgeDetection {
 		BitmapHandler bitmaphandler = new BitmapHandler(currContext);
 		sourceImage = bitmaphandler.decodeFileAsPath(filePath);
 		//sourceImage = readBitmap(inputImageUri);
+		File file = new File(
+				Environment
+						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+				"bitmapped.bmp");
 
+		try {
+			FileOutputStream out = new FileOutputStream(file);
+			sourceImage.compress(Bitmap.CompressFormat.PNG, 90, out);
+		} catch (Exception e) {
+			Log.v(TAG, "null2");
+			e.printStackTrace();
+		}
+		
 		destImage = sourceImage;
 
 		src.release();
