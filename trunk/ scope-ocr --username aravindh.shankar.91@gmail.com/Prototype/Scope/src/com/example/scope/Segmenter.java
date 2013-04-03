@@ -58,12 +58,14 @@ public class Segmenter {
 	/*
 	 * This method segments the image according to background color
 	 */
-	public List<Uri> SegmentBackground() {
+	public List<Uri> SegmentBackground(Uri toCrop) {
 		Mat sourceImageMat = new Mat();
+		Mat toCropMat = new Mat();
 		Mat destImageMat_temp = new Mat();
 		Mat destImageMat = new Mat();
 
 		Bitmap sourceImage = null;
+		Bitmap toCropImage = null;
 		Bitmap destImage = null;
 
 		try {
@@ -75,11 +77,22 @@ public class Segmenter {
 			Log.v(TAG, "NULL");
 			e.printStackTrace();
 		}
+		
+		try {
+			toCropImage = MediaStore.Images.Media.getBitmap(
+					currContext.getContentResolver(), toCrop);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.v(TAG, "NULL");
+			e.printStackTrace();
+		}
 
 		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
 		destImage = sourceImage;
 
 		Utils.bitmapToMat(sourceImage, sourceImageMat);
+		Utils.bitmapToMat(toCropImage, toCropMat);
 		destImageMat_temp = Mat.zeros(sourceImageMat.size(),
 				sourceImageMat.type());
 		destImageMat = Mat.zeros(sourceImageMat.size(), sourceImageMat.type());
@@ -159,7 +172,7 @@ public class Segmenter {
 						boundingRectangles.get(maxAreaIdx).y,
 						boundingRectangles.get(maxAreaIdx).width,
 						boundingRectangles.get(maxAreaIdx).height,
-						sourceImageMat);
+						toCropMat);
 
 				coordinates.add(boundingRectangles.get(maxAreaIdx).x + ":"
 						+ boundingRectangles.get(maxAreaIdx).y);
@@ -189,6 +202,11 @@ public class Segmenter {
 				Log.v(TAG, uri.toString());
 				segmentedResults.add(uri);
 			}
+		}
+		
+		if (segmentedResults.size() == 0) {
+			Log.v(TAG, "No Segments Found. Returning original");
+			segmentedResults.add(toCrop);
 		}
 
 		return segmentedResults;

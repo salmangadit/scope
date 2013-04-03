@@ -125,7 +125,7 @@ public class EdgeDetection {
 		File file = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
+				"edgedetected.bmp");
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);

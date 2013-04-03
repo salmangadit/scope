@@ -219,8 +219,11 @@ public class ScanFragment extends Fragment {
 		Date now = new Date();
 		EdgeDetection detector = new EdgeDetection(context, Uri.fromFile(file), filepath);
 		Uri EdgeDetectedImage = detector.AutoRotation();
+		
 		Date after = new Date();
 		Log.v(TAG, "Edge detection time: " + (after.getTime() - now.getTime()));
+		
+		
 		// Passing intent over to Ocrmain class
 		Intent intent = new Intent(context, CropScreen.class);
 		// intent.putExtra("file_path", filePath);
