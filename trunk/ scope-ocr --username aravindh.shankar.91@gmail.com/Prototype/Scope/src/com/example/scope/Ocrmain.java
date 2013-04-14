@@ -83,6 +83,8 @@ public class Ocrmain extends Activity {
 
 			for (int j = 0; j < textSegs.size(); j++) {
 				allText.add(textSegs.get(j));
+//				allText.add(adaptiveResults.get(i));
+//				allCoords.add("99:99");
 				allCoords.add(coordinates.get(j));
 			}
 		}

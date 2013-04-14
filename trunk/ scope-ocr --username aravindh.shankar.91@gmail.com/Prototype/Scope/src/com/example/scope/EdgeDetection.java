@@ -360,7 +360,7 @@ public class EdgeDetection {
 					is_negative = 1;
 				}
 			}
-			
+			//is_negative=1;
 			if(is_negative == 0){
 				if(angle<-45.0)
 				{
