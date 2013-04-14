@@ -86,20 +86,61 @@ public class Analyse {
 		
 		Imgproc.calcHist(image, channels, mask , histogram, histsize, ranges, accumulate);
 		Log.v(TAG, "Histogram: " + histogram.dump()); 
+		Log.v(TAG,"Analysing");
+		Log.v(TAG, "Element 1: " + histogram.get(1, 0)[0]);
 		
-		double low = 0,high = 0;
+		double[] temp_array = new double[64];
+		int[] id = new int[64];
 		for(int i=0;i<64;i++)
-		{	
-			if(i<=33)
-				low+=histogram.get(i,0)[0];
-			else
-				high+=histogram.get(i,0)[0];
-			
+		{   
+			temp_array[i] = (double)histogram.get(i, 0)[0];
+			id[i] = i;
 		}
-		Log.v(TAG,"middle" + (histogram.get(32,0)[0]) );
+		Log.v(TAG, "Array1 " +temp_array[2]);
+		double t=0;
+		int k=0;
+		for(int i=0;i<64;i++)
+			for(int j =1; j< (64-i); j++)
+			{
+				if(temp_array[j-1] > temp_array[j]){
+					  t = temp_array[j-1];
+					  temp_array[j-1]=temp_array[j];
+					  temp_array[j]=t;
+					  
+					  k= id[j-1];
+					  id[j-1]=id[j];
+					  id[j] = k;
+					  }	
+			}
+		
+		int high =0,low=0;
+		for(int i=63; i>53 ;i--)
+		{
+			if(id[i]>32)
+				high++;
+			else
+				low++;
+		}
+		
 		Log.v(TAG," " + low + " "+ high);
 		
-		if(high>low)
+		
+//		
+//		Log.v(TAG, "Array2 " +temp_array[2]);
+//		
+//		double low = 0,high = 0;
+//		for(int i=0;i<64;i++)
+//		{	
+//			if(i<=33)
+//				low+=histogram.get(i,0)[0];
+//			else
+//				high+=histogram.get(i,0)[0];
+//			
+//		}
+//		Log.v(TAG,"middle" + (histogram.get(32,0)[0]) );
+//		Log.v(TAG," " + low + " "+ high);
+		
+		if(high>=low)
 			return true;
 		return false;
 	}
