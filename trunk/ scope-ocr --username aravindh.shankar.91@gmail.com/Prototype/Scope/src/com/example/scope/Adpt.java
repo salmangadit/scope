@@ -92,6 +92,8 @@ public class Adpt {
 		int order = 1;;
 		if(value!=0)
 		order = Imgproc.ADAPTIVE_THRESH_MEAN_C;
+		else
+			order = Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
 		Log.v(TAG, "sourceImage Size: " + sourceImage.getByteCount());
 
 		destImage = sourceImage;
@@ -101,8 +103,8 @@ public class Adpt {
 				.zeros(destImageMat.size(), destImageMat.type());
 		Imgproc.cvtColor(sourceImageMat, destImageMat, Imgproc.COLOR_RGB2GRAY);
 		
-		Log.v(TAG, "Size = 1");
-		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, order, Imgproc.THRESH_BINARY, 5, 5);
+		Log.v(TAG, "adpt "+Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C);
+		Imgproc.adaptiveThreshold(destImageMat, final_dest_mat, 255, order, Imgproc.THRESH_BINARY, 9, 9);
 		
 		Utils.matToBitmap(final_dest_mat, destImage);
 
