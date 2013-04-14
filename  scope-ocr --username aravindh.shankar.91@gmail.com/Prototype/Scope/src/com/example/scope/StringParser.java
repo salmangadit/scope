@@ -3,8 +3,10 @@ package com.example.scope;
 import java.io.*;
 import java.util.ArrayList;
 
-public class StringParser {
+import android.util.Log;
 
+public class StringParser {
+	private static final String TAG = "Scope.java";
 	private final String[] ADDRESS_DICT = new String[] { "level", "building",
 			"headquarters", "centre", "engineering", "drive", "street", "road",
 			"lane", "house" };
@@ -68,6 +70,10 @@ public class StringParser {
 			for (int i = 0; i < trackLines.length; ++i) {
 				trackLines[i] = 0;
 			}
+			
+			for(int j = 0; j < linesList.size(); ++j){
+				Log.v(TAG, linesList.get(j));
+			}
 			address_linesList = linesList;
 			numbers_linesList = linesList;
 			FilterAddress();
@@ -126,10 +132,13 @@ public class StringParser {
 		for (int i = 0; i < wordsList.length; ++i) {
 			if ((wordsList[i].equals(WORD_SINGAPORE))
 					|| (LevenshteinDistance(wordsList[i], WORD_SINGAPORE) < 3)) {
-				if (IsInt(wordsList[i + 1]) && (wordsList[i + 1].length() == 6)) {
+				if ((i+1 < wordsList.length) && IsInt(wordsList[i + 1]) && (wordsList[i + 1].length() == 6)) {
 					last_index = i + 1;
-					addressConfidence = 1;
 				}
+				else{
+					last_index = i;
+				}
+					addressConfidence = 1;
 			}
 		}
 		if (last_index > -1) {
@@ -177,6 +186,7 @@ public class StringParser {
 
 						if (startLine < 0) {
 							startLine = lineCount;
+							endLine = startLine;
 						} else {
 							endLine = lineCount;
 						}
@@ -187,6 +197,18 @@ public class StringParser {
 						address_linesList.set(lineCount, temp);
 						trackLines[lineCount] = 1;
 					}
+				}
+			}
+			
+			if ((wordsList[i].equals(WORD_SINGAPORE))|| (LevenshteinDistance(wordsList[i], WORD_SINGAPORE) < 3)) {
+				if ((i+1 < wordsList.length) && IsInt(wordsList[i + 1]) && (wordsList[i + 1].length() == 6)) {
+					if (startLine < 0) {
+						startLine = lineCount;
+						endLine = startLine;
+					} else {
+						endLine = lineCount;
+					}
+					trackLines[lineCount] = 1;
 				}
 			}
 
@@ -215,18 +237,23 @@ public class StringParser {
 
 	// Does check to identify valid Websites
 	private void FilterWeb() {
-		int site_confidence = 0;
+		int site_confidence = 1;
 		for (String line : site_linesList) {
 			wordsList = line.split(" ");
 			for (String word : wordsList) {
-				site_confidence = 0;
+				for (int i = 0; i < WEBSITE_DICT.length; ++i) {
+					if (word.equals(WEBSITE_DICT[i])
+							|| (LevenshteinDistance(word, WEBSITE_DICT[i]) < 3)) {
+						site_confidence++;
+					}
+				}
 				for (String domain : DOMAIN_DICT) {
 					if (word.contains(domain)) {
 						site_confidence++;
 					}
 				}
 				if( site_confidence > 0 ){
-					siteList.add(new SiteObj(word));
+					siteList.add(new SiteObj(word, site_confidence));
 				}
 			}
 		}
@@ -474,9 +501,9 @@ public class StringParser {
 		for (int i = 1; i <= str1.length(); i++)
 			for (int j = 1; j <= str2.length(); j++)
 				distance[i][j] = Minimum(
-						distance[i - 1][j] + 1,
-						distance[i][j - 1] + 1,
-						distance[i - 1][j - 1]
+						distance[i - 1][j] + 1,//above cell - insertion
+						distance[i][j - 1] + 1,//left cell - deletion
+						distance[i - 1][j - 1] //above-left cell - match (or) mismatch
 								+ ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0
 										: 1));
 
