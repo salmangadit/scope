@@ -79,14 +79,14 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		
 		// progress.setMessage("Applying line segmentation");
 		publishProgress("Applying background segmentation");
-//		SegmentLine segmenter = new SegmentLine(
-//				preprocess.getApplicationContext(), ppimage3, ppimage1);
-//		List<Uri> segmentedResults = segmenter.segLine();
+		SegmentLine segmenter = new SegmentLine(
+				preprocess.getApplicationContext(), ppimage3, ppimage1);
+		List<Uri> segmentedResults = segmenter.segLine();
 		
-		Segmenter bgSegmenter = new Segmenter(
-				preprocess.getApplicationContext(), uri);
-		List<Uri> segmentedResults = bgSegmenter.SegmentBackground(ppimage1);
-		
+//		Segmenter bgSegmenter = new Segmenter(
+//				preprocess.getApplicationContext(), uri);
+//		List<Uri> segmentedResults = bgSegmenter.SegmentBackground(ppimage1);
+//		
 		later = new Date();
 		diff = later.getTime() - now.getTime();
 		Log.v(TAG, "BG segmentation time: " + diff);
