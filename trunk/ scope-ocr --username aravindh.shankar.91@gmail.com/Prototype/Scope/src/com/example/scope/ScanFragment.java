@@ -227,8 +227,8 @@ public class ScanFragment extends Fragment {
 		// Passing intent over to Ocrmain class
 		Intent intent = new Intent(context, CropScreen.class);
 		// intent.putExtra("file_path", filePath);
-		intent.putExtra("image_uri", Uri.fromFile(file).toString());
-		intent.putExtra("file_path", EdgeDetectedImage.toString());
+		intent.putExtra("image_uri", EdgeDetectedImage.toString()/*Uri.fromFile(file).toString()*/);
+		intent.putExtra("file_path", filepath/*EdgeDetectedImage.toString()*/);
 		startActivity(intent);
 	}
 }
