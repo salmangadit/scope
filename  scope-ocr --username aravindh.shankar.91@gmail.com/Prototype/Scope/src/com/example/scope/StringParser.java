@@ -448,10 +448,12 @@ public class StringParser {
 		}
 		for (PhoneObj phone_obj : numberList) {
 			if ((phone_obj.confidence >= max - 1) && (phone_obj.confidence > 1)) {
-				if (phone_obj.isFax) {
-					faxString += phone_obj.phoneNumberString + " ";
-				} else {
-					numberString += phone_obj.phoneNumberString + " ";
+				if(phone_obj.phoneNumberString.length() > 6){
+					if (phone_obj.isFax) {
+						faxString += phone_obj.phoneNumberString + " ";
+					} else {
+						numberString += phone_obj.phoneNumberString + " ";
+					}
 				}
 			}
 			System.out.println(phone_obj.phoneNumberString
@@ -464,6 +466,7 @@ public class StringParser {
 		String namestring = "";
 		String temp_string = "";
 		String address = "";
+		String temp = "";
 		for (int j = 0; j < linesList.size(); ++j) {
 			if (trackLines[j] == 0) {
 				namestring = linesList.get(j);
@@ -475,12 +478,14 @@ public class StringParser {
 					wordsList = namestring.split(" ");
 					temp_string = "";
 					for (int i = 0; i < wordsList.length; ++i) {
-						wordsList[i] = wordsList[i]
+						temp = wordsList[i]
 								.replaceAll("[^\\w\\s]+", "");
-						StringBuilder word = new StringBuilder(wordsList[i]);
-						word.setCharAt(0, Character.toUpperCase(word.charAt(0)));
-						wordsList[i] = word.toString();
-						nameString += wordsList[i] + " ";
+						if(temp.length() > 0){
+							StringBuilder word = new StringBuilder(temp);
+							word.setCharAt(0, Character.toUpperCase(word.charAt(0)));
+							wordsList[i] = word.toString();
+							nameString += wordsList[i] + " ";
+						}
 					}
 				}
 			}
