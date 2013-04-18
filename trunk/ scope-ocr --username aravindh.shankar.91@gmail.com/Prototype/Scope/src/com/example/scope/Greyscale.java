@@ -86,7 +86,7 @@ public class Greyscale {
 		File file = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"temp.bmp");
+				"temp_grey.bmp");
 
 		try {
 			FileOutputStream out = new FileOutputStream(file);
