@@ -36,6 +36,11 @@ public class PreProcessAsync extends AsyncTask<Void, String, String> {
 		Greyscale grey = new Greyscale(preprocess.getApplicationContext(), uri);
 		Uri ppimage1 = grey.greyscale();
 		
+		 Threshold thresh = new Threshold(preprocess.getApplicationContext(),ppimage1);
+		 double value = thresh.otsu();
+		 Uri ppimage55 = thresh.thresh_binary(150, 255); //Uses user defined value to perform threshold operation on the image
+		  //Uses the otsu threshold value to perform threshold operation
+		
 		Date later = new Date();
 		long diff = later.getTime() - now.getTime();
 		Log.v(TAG, "Greyscale time: " + diff);
