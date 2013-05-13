@@ -86,18 +86,9 @@ public class EdgeDetection {
 	}
 
 	private void FixImageProperties() {
-		// try {
-		// sourceImage = MediaStore.Images.Media.getBitmap(
-		// currContext.getContentResolver(), inputImageUri);
-		// } catch (FileNotFoundException e) {
-		// e.printStackTrace();
-		// } catch (IOException e) {
-		// Log.v(TAG, "NULL");
-		// e.printStackTrace();
-		// }
-		//
 		BitmapHandler bitmaphandler = new BitmapHandler(currContext);
 		sourceImage = bitmaphandler.decodeFileAsPath(filePath);
+		
 		//sourceImage = readBitmap(inputImageUri);
 		File file = new File(
 				Environment
@@ -140,6 +131,7 @@ public class EdgeDetection {
 		return uri;
 	}
 
+	//Calculates angles between adjacent sides given three points
 	public double angle( Point pt1, Point pt2, Point pt0 ) {
 	    double dx1 = pt1.x - pt0.x;
 	    double dy1 = pt1.y - pt0.y;
@@ -148,6 +140,7 @@ public class EdgeDetection {
 	    return (dx1*dx2 + dy1*dy2)/Math.sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
 	}
 	
+	//Main Edge Detection Method
 	public MatOfPoint EdgeDetect(Mat source) {
 		int counter = 0;
 		Mat test = new Mat();
@@ -158,60 +151,57 @@ public class EdgeDetection {
 		Imgproc.medianBlur(source, blurred, 9);
 		Log.v(TAG, "Median Blur Done!");
 
-		Mat gray0 = new Mat(blurred.size(), blurred.type());
-		Imgproc.cvtColor(gray0, gray0, Imgproc.COLOR_RGB2GRAY);
+		Mat gray_temp = new Mat(blurred.size(), blurred.type());
+		Imgproc.cvtColor(gray_temp, gray_temp, Imgproc.COLOR_RGB2GRAY);
 		Mat gray = new Mat();
 
-		Log.v(TAG, "Gray0 Matrix! : " + gray0.total() );
+		Log.v(TAG, "gray_temp Matrix! : " + gray_temp.total() );
 		Log.v(TAG, "Gray Matrix! : " + gray.total() );
 		
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		List<MatOfPoint> squares = new ArrayList<MatOfPoint>();
 		
-		// find squares in every color plane of the image
+		// Iterate through each of the three colour spaces and through original image as well
 	    for (int c = 0; c < 4; c++)
 	    {
 	    	Log.v(TAG,"Color Space Entering Iteration: " + c);
 	    	if(c==3){
 	    		Mat destImageMat = new Mat();
 	    		Imgproc.cvtColor(source, destImageMat, Imgproc.COLOR_RGB2GRAY);
-	    		destImageMat.copyTo(gray0);
+	    		destImageMat.copyTo(gray_temp);
 	    	}
 	    	
 	    	else{
-				Log.v(TAG, "Mix Channels Started! : " + gray0.total());
+				Log.v(TAG, "Mix Channels Started! : " + gray_temp.total());
 		        int ch[] = {c, 0};
 		        MatOfInt fromto = new MatOfInt(ch);
 		        List<Mat> blurredlist = new ArrayList<Mat>();
 		        List<Mat> graylist = new ArrayList<Mat>();
 		        blurredlist.add(0, blurred);
-		        graylist.add(0, gray0);
+		        graylist.add(0, gray_temp);
 		        Core.mixChannels(blurredlist, graylist, fromto);
-		        gray0 = graylist.get(0);
-				Log.v(TAG, "Mix Channels Done! : " + gray0.total() );
+		        gray_temp = graylist.get(0);
+				Log.v(TAG, "Mix Channels Done! : " + gray_temp.total() );
 	    	}
 
-	     // try several threshold levels
+	    	//For each colour space perform both Canny Detection and Adaptive Thresholding
 	        int threshold_level = 2;
 	        for (int l = 0; l < threshold_level; l++)
 	        {
-	            // Use Canny instead of zero threshold level!
-	            // Canny helps to catch squares with gradient shading
 	        	Log.v(TAG,"Threshold Level: " + l);
 	        	
 	            if (l == 0)
 	            {
-	                Imgproc.Canny(gray0, gray, 20, 30); // 
-
-	                // Dilate helps to remove potential holes between edge segments
+	                Imgproc.Canny(gray_temp, gray, 20, 30); // 
 	                Imgproc.dilate(gray, gray, Mat.ones(new Size(3,3),0));
 	                
 	            }
 	            else
 	            {
 	            	Mat final_dest_mat = Mat.zeros(source.size(), source.type());
-	        		Imgproc.adaptiveThreshold(gray0, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 5);
+	        		Imgproc.adaptiveThreshold(gray_temp, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 5);
 	        		
+	        		//Perform erode operation
 	        		if(c == 0){
 	    	    		int matrix_size = 2;
 	    	    		Size size = new Size(matrix_size,matrix_size);
@@ -230,7 +220,8 @@ public class EdgeDetection {
 
 	    		Log.v(TAG, "Canny (or Thresholding) Done!");
 	    		Log.v(TAG, "Gray Matrix (after)! : " + gray.total() );
-	            // Find contours and store them in a list
+	    		
+	            // Retrieve all the contours and store them in a list
 	            Imgproc.findContours(gray, contours, new Mat(), 1, 2);
 	    		Log.v(TAG, "Contours Found!");
 	            
@@ -242,11 +233,12 @@ public class EdgeDetection {
 	            	contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
 	            	Imgproc.approxPolyDP(mMOP2f1, approx, Imgproc.arcLength(mMOP2f1, true)*0.02, true);
 	            	approx.convertTo(mMOP, CvType.CV_32S);
-	                   	
+	                  
+	            	//Check for basic card conditions in each closed contour
 	                if( approx.rows()==4 && Math.abs(Imgproc.contourArea(approx)) > 1000 && Imgproc.isContourConvex(mMOP))
 	                {
 	                	
-	                	Log.v(TAG,"Passes Conditions! " + approx.size().toString());
+	                	//Log.v(TAG,"Passes Conditions! " + approx.size().toString());
 	                	double maxcosine = 0;
 	                	Point[] list = approx.toArray();
 	                	int rectangle_flag = 0;
@@ -262,7 +254,7 @@ public class EdgeDetection {
 	                				 rectangle_flag = 1;
 	                			 }
 	                		 }
-	                		 Log.v(TAG,"Cosine of side " + j + " = " + cosine);
+	                		 //Log.v(TAG,"Cosine of side " + j + " = " + cosine);
 	                		 maxcosine = Math.max(maxcosine, cosine);
                          }
 	                	 
@@ -272,7 +264,7 @@ public class EdgeDetection {
 	                		 if((Imgproc.contourArea(approx)/src.total())<0.85){
 	                			 if(rectangle_flag == 0){
 		                			 squares.add(temp);
-		             	    		Log.v(TAG, "Squares Added to List! : " + squares.size());
+		             	    		//Log.v(TAG, "Squares Added to List! : " + squares.size());
 		                		 }
 	                		 }
 	                     }
@@ -281,6 +273,7 @@ public class EdgeDetection {
 	        }
 	    }
 	    
+	    //Find rectangular contour with biggest area
 	    double maxarea = 0;
 		double secmaxarea = 0;
 		int maxareaidx = 0;
@@ -318,25 +311,8 @@ public class EdgeDetection {
 			return null;
 		}
 }	
-//	    Mat mask = Mat.zeros(dst.size(), dst.type());
-//		
-//		Imgproc.drawContours(mask, squares, maxareaidx, s, -1);
-//		Log.v(TAG, "All Contours drawn!");
-//		
-//		Point[] p = squares.get(maxareaidx).toArray();
-//		Log.v(TAG,"Size: " + squares.get(maxareaidx).size());
-//		Log.v(TAG, "Contours of Max Rectangle " + p.length);
-//		Log.v(TAG, "Points of Contour : 1) " + p[0].x + " " + p[0].y);
-//		Log.v(TAG, "Points of Contour : 2) " + p[1].x + " " + p[1].y);
-//		Log.v(TAG, "Points of Contour : 3) " + p[2].x + " " + p[2].y);
-//		Log.v(TAG, "Points of Contour : 4) " + p[3].x + " " + p[3].y);
-//		Log.v(TAG,"No. of points" + p.length);
-//		
-//		Mat canvas = new Mat(src.size(),src.type());
-//		Scalar s2 = new Scalar(255,255,255);
-//		canvas.setTo(s2);
-//		src.copyTo(canvas, mask);
-		
+	
+	//Main AutoRotation Method
 	public Uri AutoRotation()
 	{	
 		MatOfPoint edges = EdgeDetect(src);
@@ -361,6 +337,7 @@ public class EdgeDetection {
 				}
 			}
 			//is_negative=1;
+			//Check corners and orientation of box and correct to horizontal
 			if(is_negative == 0){
 				if(angle<-45.0)
 				{
@@ -389,6 +366,7 @@ public class EdgeDetection {
 				
 				Log.v(TAG,"Size" + size.width + size.height);
 				
+				//Perform rotation operation
 				Imgproc.warpAffine(src, rotatedMat, transform, src.size(),Imgproc.INTER_CUBIC);
 				
 				Log.v(TAG,"RotatedMat found " + rotatedMat.total());
@@ -400,6 +378,7 @@ public class EdgeDetection {
 				Log.v(TAG,"Center of patch: "+ rotated.center.x + " " + rotated.center.y);
 			
 				
+				//Specify ROI for cropping the image
 				double ht = size.height;
 				double wdth = size.width;
 				Point centre_point = rotated.center;
