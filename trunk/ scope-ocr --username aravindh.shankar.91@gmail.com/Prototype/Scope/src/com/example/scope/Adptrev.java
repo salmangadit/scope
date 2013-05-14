@@ -1,3 +1,11 @@
+/*
+ * Class: Adptrev
+ * Author: Aravindh
+ * 
+ * To perform reverse gaussian adaptive thresholding over a ARGB8888 image.
+ * For dark background - light text images 
+ * 
+ */
 package com.example.scope;
 
 import java.io.File;
