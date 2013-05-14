@@ -1,3 +1,11 @@
+/*
+ * Class: Adpt
+ * Author: Aravindh
+ * 
+ * To perform gaussian adaptive thresholding over a ARGB8888 image. 
+ * 
+ */
+
 package com.example.scope;
 
 import java.io.File;

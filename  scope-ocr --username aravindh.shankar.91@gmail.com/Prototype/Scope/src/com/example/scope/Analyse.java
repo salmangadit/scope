@@ -1,3 +1,13 @@
+/*
+ * Class: Analyse
+ * Author: Aravindh
+ * 
+ * 1. Pixel analyser, to check if light background or dark background images
+ * 2. Pixel cleaner to remove stray black pixels
+ * 3. Pixel filler to fill up jagged letters.
+ * 
+ */
+
 package com.example.scope;
 
 import java.io.File;
