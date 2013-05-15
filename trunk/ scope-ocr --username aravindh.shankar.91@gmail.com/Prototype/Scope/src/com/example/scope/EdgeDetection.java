@@ -53,6 +53,13 @@ public class EdgeDetection {
 	int ratio = 3;
 	int threshold_low = 100;
 	int kernel_size = 3;
+	
+	//CONSTANTS
+	double ARCLENGTH_FACTOR = 0.02;
+	int AREA_THRESHOLD = 1000;
+	double AREA_PERCENTAGE = 0.85;
+	double COSINE_THRESHOLD = 0.2;
+	
 
 	public EdgeDetection(Context c, Uri inputuri, String filepath) {
 		filePath = filepath;
@@ -132,18 +139,16 @@ public class EdgeDetection {
 	}
 
 	//Calculates angles between adjacent sides given three points
-	public double angle( Point pt1, Point pt2, Point pt0 ) {
-	    double dx1 = pt1.x - pt0.x;
-	    double dy1 = pt1.y - pt0.y;
-	    double dx2 = pt2.x - pt0.x;
-	    double dy2 = pt2.y - pt0.y;
+	public double FindAngle( Point point1, Point point2, Point point0 ) {
+	    double dx1 = point1.x - point0.x;
+	    double dy1 = point1.y - point0.y;
+	    double dx2 = point2.x - point0.x;
+	    double dy2 = point2.y - point0.y;
 	    return (dx1*dx2 + dy1*dy2)/Math.sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
 	}
 	
 	//Main Edge Detection Method
 	public MatOfPoint EdgeDetect(Mat source) {
-		int counter = 0;
-		Mat test = new Mat();
 		Mat blurred = new Mat();
 		source.copyTo(blurred);
 		Log.v(TAG, "Blurred Matrix! : " + blurred.total() );
@@ -162,10 +167,10 @@ public class EdgeDetection {
 		List<MatOfPoint> squares = new ArrayList<MatOfPoint>();
 		
 		// Iterate through each of the three colour spaces and through original image as well
-	    for (int c = 0; c < 4; c++)
+	    for (int color_space = 0; color_space < 4; color_space++)
 	    {
-	    	Log.v(TAG,"Color Space Entering Iteration: " + c);
-	    	if(c==3){
+	    	Log.v(TAG,"Color Space Entering Iteration: " + color_space);
+	    	if(color_space==3){
 	    		Mat destImageMat = new Mat();
 	    		Imgproc.cvtColor(source, destImageMat, Imgproc.COLOR_RGB2GRAY);
 	    		destImageMat.copyTo(gray_temp);
@@ -173,7 +178,7 @@ public class EdgeDetection {
 	    	
 	    	else{
 				Log.v(TAG, "Mix Channels Started! : " + gray_temp.total());
-		        int ch[] = {c, 0};
+		        int ch[] = {color_space, 0};
 		        MatOfInt fromto = new MatOfInt(ch);
 		        List<Mat> blurredlist = new ArrayList<Mat>();
 		        List<Mat> graylist = new ArrayList<Mat>();
@@ -185,12 +190,12 @@ public class EdgeDetection {
 	    	}
 
 	    	//For each colour space perform both Canny Detection and Adaptive Thresholding
-	        int threshold_level = 2;
-	        for (int l = 0; l < threshold_level; l++)
+	        int iteration_count = 2;
+	        for (int iteration = 0; iteration < iteration_count; iteration++)
 	        {
-	        	Log.v(TAG,"Threshold Level: " + l);
+	        	Log.v(TAG,"Iteration : " + iteration);
 	        	
-	            if (l == 0)
+	            if (iteration == 0)
 	            {
 	                Imgproc.Canny(gray_temp, gray, 20, 30); // 
 	                Imgproc.dilate(gray, gray, Mat.ones(new Size(3,3),0));
@@ -202,7 +207,7 @@ public class EdgeDetection {
 	        		Imgproc.adaptiveThreshold(gray_temp, final_dest_mat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 5);
 	        		
 	        		//Perform erode operation
-	        		if(c == 0){
+	        		if(color_space == 0){
 	    	    		int matrix_size = 2;
 	    	    		Size size = new Size(matrix_size,matrix_size);
 	    	    		
@@ -231,11 +236,11 @@ public class EdgeDetection {
 	            for( int i = 0; i < contours.size(); i++ )
 	            {
 	            	contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
-	            	Imgproc.approxPolyDP(mMOP2f1, approx, Imgproc.arcLength(mMOP2f1, true)*0.02, true);
+	            	Imgproc.approxPolyDP(mMOP2f1, approx, Imgproc.arcLength(mMOP2f1, true)*ARCLENGTH_FACTOR, true);
 	            	approx.convertTo(mMOP, CvType.CV_32S);
 	                  
 	            	//Check for basic card conditions in each closed contour
-	                if( approx.rows()==4 && Math.abs(Imgproc.contourArea(approx)) > 1000 && Imgproc.isContourConvex(mMOP))
+	                if( Math.abs(Imgproc.contourArea(approx)) > AREA_THRESHOLD && approx.rows()== 4 && Imgproc.isContourConvex(mMOP))
 	                {
 	                	
 	                	//Log.v(TAG,"Passes Conditions! " + approx.size().toString());
@@ -245,7 +250,7 @@ public class EdgeDetection {
 	                	double temp_cosine = 0;
 	                	 for (int j = 2; j < 5; j++)
 	                	 {	 
-	                		 double cosine =Math.abs(angle(list[j%4], list[j-2], list[j-1]));
+	                		 double cosine =Math.abs(FindAngle(list[j%4], list[j-2], list[j-1]));
 	                		 if(j == 2){
 	                			 temp_cosine = cosine;
 	                		 }
@@ -258,10 +263,10 @@ public class EdgeDetection {
 	                		 maxcosine = Math.max(maxcosine, cosine);
                          }
 	                	 
-	                	 if( maxcosine < 0.2 ) {
+	                	 if( maxcosine < COSINE_THRESHOLD ) {
 	                		 MatOfPoint temp = new MatOfPoint();
 	                		 approx.convertTo(temp, CvType.CV_32S);
-	                		 if((Imgproc.contourArea(approx)/src.total())<0.85){
+	                		 if((Imgproc.contourArea(approx)/src.total())<AREA_PERCENTAGE){
 	                			 if(rectangle_flag == 0){
 		                			 squares.add(temp);
 		             	    		//Log.v(TAG, "Squares Added to List! : " + squares.size());
@@ -326,7 +331,7 @@ public class EdgeDetection {
 			Log.v(TAG,"Rotated Rect Received" + rotated.angle);
 			Log.v(TAG,"Rotated Rect: " + rotated.center.x + rotated.center.y);
 			double angle = rotated.angle;
-			Size size = rotated.size;
+			Size box_size = rotated.size;
 			
 			Point[] corners = new Point[4];
 			rotated.points(corners);
@@ -342,21 +347,21 @@ public class EdgeDetection {
 				if(angle<-45.0)
 				{
 					angle = angle + 90.0;
-					double temp = size.width;
-					size.width = size.height;
-					size.height = temp;
+					double temp = box_size.width;
+					box_size.width = box_size.height;
+					box_size.height = temp;
 				}	
 				
-				if(size.width < size.height){
+				if(box_size.width < box_size.height){
 					if(corners[1].y < corners[3].y){
 						angle = angle + 90;
 					}
 					else{
 						angle = angle - 90;
 					}
-					double temp = size.width;
-					size.width = size.height;
-					size.height = temp;
+					double temp = box_size.width;
+					box_size.width = box_size.height;
+					box_size.height = temp;
 				}
 				
 				Log.v(TAG,"Final Angle Desired: " + angle);
@@ -364,7 +369,7 @@ public class EdgeDetection {
 				Mat transform = Imgproc.getRotationMatrix2D(rotated.center, angle, 1.0);
 				Mat rotatedMat = new Mat(src.size(),src.type());
 				
-				Log.v(TAG,"Size" + size.width + size.height);
+				Log.v(TAG,"Size" + box_size.width + box_size.height);
 				
 				//Perform rotation operation
 				Imgproc.warpAffine(src, rotatedMat, transform, src.size(),Imgproc.INTER_CUBIC);
@@ -374,13 +379,13 @@ public class EdgeDetection {
 				rotatedMat.convertTo(rotatedMat, 0);
 				
 				
-				Log.v(TAG,"Size of patch: " + size.height + " " + size.width);
+				Log.v(TAG,"Size of patch: " + box_size.height + " " + box_size.width);
 				Log.v(TAG,"Center of patch: "+ rotated.center.x + " " + rotated.center.y);
 			
 				
 				//Specify ROI for cropping the image
-				double ht = size.height;
-				double wdth = size.width;
+				double ht = box_size.height;
+				double wdth = box_size.width;
 				Point centre_point = rotated.center;
 				Point[] p = new Point[4];
 				p[0] = new Point(centre_point.x - (wdth/2), centre_point.y + (ht/2));
